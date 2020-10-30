@@ -19,10 +19,10 @@ def rect_overlap(rectA, rectB):
     """
 
     ret = (
-        rectA.Left < rectB.Right
-        and rectA.Right > rectB.Left
-        and rectA.Top > rectB.Bottom
-        and rectA.Bottom < rectB.Top
+        rectA.left < rectB.right
+        and rectA.right > rectB.left
+        and rectA.top > rectB.bottom
+        and rectA.bottom < rectB.top
     )
     return ret
 
@@ -47,17 +47,65 @@ def cv_rect_to_std(rect):
     y +
     """
     new_rect = None
-    new_rect.Top = rect[0]
-    new_rect.Left = rect[1]
-    new_rect.Bottom = rect[0] + rect[2]
-    new_rect.Right = rect[1] + rect[3]
+    new_rect.top = rect[0]
+    new_rect.left = rect[1]
+    new_rect.bottom = rect[0] + rect[2]
+    new_rect.right = rect[1] + rect[3]
     return new_rect
 
 
-def rec_list_to_dict(rects):
+def std_rect_to_cv(rect):
+    """
+    Convert rectangle from Std representation back to CV representation
+    """
+    new_rect = (rect.top, rect.left, rect.bottom - rect.top, rect.right - rect.left)
+    return new_rect
+
+
+def rect_list_to_dict(rects):
     """
     Takes a list of rects and returns their dictionary representation for
     simple filtering.
+    """
+    rec_dict = {}
+    for rect in rects:
+        rect_mod = cv_rect_to_std(rect)
+        rec_dict[rect_mod.left] = rect_mod
+
+    return rec_dict
+
+
+def group_rects(rects, min_x, max_x):
+    """
+    Accepts a dictionary of rects in this format:
+    left-coordinate: {left, right, top, bottom}
+    And scans the complete (min_x, max_x) space to group rectangles.
+
+    More technically, I am tackling the overlapping rectangle problem using a
+    scanning line from min_x to min_max. This is why it's important for the rect
+    dictionary to have keys as the left most coordinate of a rectangle; this
+    makes lookups pretty easy depending on what level I'm scanning in.
+
+    I am also maintaining a UnionFind structure of all the unique components.
+    What UF allows me to do is to efficiently add rectangles to one component
+    or to another, all the while maintaining the top left and bottom right
+    coordinates of the conglomerate rectangle <<<TODO
+
+    While scanning, I am maintaining a min heap of all rectangle's right most
+    endpoints as key (since when the scanning index is greater than the right most
+    endpoint, we are no longer in that rectangle) and the actual rectangle as an
+    entry.
+
+    The main objective here is, any time there is a new rectangle added to the
+    mean heap, to iterate through the mean heap, checking if the rectangles
+    overlap.
+        | If they do: we perform a union() call on this rectangle pair.
+
+    We then continue checking each rectangle pair and once we are done, we add
+    the current rectangle to the min heap.
+
+    The function itself will return the entries from UF, as they are (which
+    later in the pipeline, will be converted back to how OpenCV expects them)
     """
 
 
