@@ -19,3 +19,7 @@ def saveImg(img, name):
         img.save("{0}.png".format(name))
     else:
         cv2.imwrite("{0}.png".format(name), img)
+
+
+def openImg(img_path):
+    return cv2.imread(img_path)
