@@ -7,17 +7,20 @@ class WeightedQuickUnionUF:
     https://algs4.cs.princeton.edu/code/javadoc/edu/princeton/cs/algs4/WeightedQuickUnionUF.html
     """
 
-    def __init__(self, n: int):
+    def __init__(self, n: int, entries):
         """
         Initializes an empty union–find data structure with n sites
         0 through n-1. Each site is initially in its own
         component.
+
+        Within the parent list, each entry is a tuple that contains the "parent"
+        index, as well as the object holding that specific entry (generic)
         """
         self.parent = [None] * n
         self.size = [1] * n
         self.count = n
         for i in range(n):
-            self.parent[i] = i
+            self.parent[i] = (i, entries[i])
 
     def count(self):
         """
@@ -30,10 +33,11 @@ class WeightedQuickUnionUF:
         Returns the component identifier for the component containing site p.
         """
         self._validate(p)
-        while p != self.parent[p]:
+        while p != self.parent[p][0]:
             # path compression (make every other node in path point to its grandparent)
-            self.parent[p] = self.parent[self.parent[p]]
-            p = self.parent[p]
+            self.parent[p] = (self.parent[self.parent[p][0]][0], self.parent[p][1])
+
+            p = self.parent[p][0]
 
         return p
 
@@ -64,10 +68,10 @@ class WeightedQuickUnionUF:
 
         # make smaller root point to larger one
         if self.size[rootP] < self.size[rootQ]:
-            self.parent[rootP] = rootQ
+            self.parent[rootP] = (rootQ, self.parent[rootP][1])
             self.size[rootQ] = self.size[rootQ] + self.size[rootP]
         else:
-            self.parent[rootQ] = rootP
+            self.parent[rootQ] = (rootP, self.parent[rootQ][1])
             self.size[rootP] = self.size[rootP] + self.size[rootQ]
 
         self.count = self.count - 1

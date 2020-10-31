@@ -4,6 +4,7 @@ import argparse
 import random as rng
 import heapq
 from icondetection.weighted_quick_unionUF import WeightedQuickUnionUF as uf
+import sys
 
 rng.seed(12345)
 
@@ -33,7 +34,26 @@ def merge_rects(rects):
     """
     Merges a list of rects into one conglomerate rect.
     """
-    pass
+
+    # for now, just parse through the list, obtaining the smallest
+    # value for top, left, and biggest value for bottom, right
+    ans = None
+    ans.top = sys.maxsize
+    ans.left = sys.maxsize
+    ans.bottom = 0
+    ans.right = 0
+
+    for rect in rects:
+        if rect.left < ans.left:
+            ans.left = rect.left
+        if rect.top < ans.top:
+            ans.top = rect.top
+        if rect.bottom > ans.bottom:
+            ans.bottom = rect.bottom
+        if rect.right > ans.bottom:
+            ans.bottom = rect.bottom
+
+    return ans
 
 
 def cv_rect_to_std(rect):
@@ -70,16 +90,19 @@ def rect_list_to_dict(rects):
     simple filtering.
     """
     rec_dict = {}
-    for rect in rects:
+    rec_list = [None] * len(rects)
+    for i in range(len(rects)):
         rect_mod = cv_rect_to_std(rect)
         rec_dict[rect_mod.left] = rect_mod
+        rec_list[i] = rect_mod
 
-    return rec_dict
+    return (rec_dict, rect_mod)
 
 
-def group_rects(rects, num_rects, min_x, max_x):
+def group_rects(cv_rects, min_x, max_x):
     """
-    Accepts a dictionary of rects in this format:
+    Accepts a list of rects. This list is converted to a dictionary in
+    this format:
     left-coordinate: [
         {left, right, top, bottom},
         {left, right, top, bottom},
@@ -116,9 +139,9 @@ def group_rects(rects, num_rects, min_x, max_x):
     The function itself will return the entries from UF, as they are (which
     later in the pipeline, will be converted back to how OpenCV expects them)
     """
-
+    rect_list, rect_dict = rect_list_to_dict(cv_rects)
     rect_heap = []
-    unified_rects = uf(num_rects)
+    unified_rects = uf(len(rect_list), rect_list)
 
     for x in range(min_x, max_x):
         # prune any outdated rects from the current_rects
@@ -131,7 +154,7 @@ def group_rects(rects, num_rects, min_x, max_x):
                 break
 
         # get the potential list of rectangles along this axis
-        temp_rects = rects[x]
+        temp_rects = cv_rects[x]
         # for each rect in the current_rects priority queue,
         # check each of these entries against each in temp_rects and perform
         # union if required
