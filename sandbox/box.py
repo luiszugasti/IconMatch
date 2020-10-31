@@ -2,6 +2,8 @@ import cv2 as cv
 import numpy as np
 import argparse
 import random as rng
+import heapq
+from icondetection.weighted_quick_unionUF import WeightedQuickUnionUF as uf
 
 rng.seed(12345)
 
@@ -75,10 +77,17 @@ def rect_list_to_dict(rects):
     return rec_dict
 
 
-def group_rects(rects, min_x, max_x):
+def group_rects(rects, num_rects, min_x, max_x):
     """
     Accepts a dictionary of rects in this format:
-    left-coordinate: {left, right, top, bottom}
+    left-coordinate: [
+        {left, right, top, bottom},
+        {left, right, top, bottom},
+        .
+        .
+        .
+        {left, right, top, bottom}
+    ]
     And scans the complete (min_x, max_x) space to group rectangles.
 
     More technically, I am tackling the overlapping rectangle problem using a
@@ -107,6 +116,36 @@ def group_rects(rects, min_x, max_x):
     The function itself will return the entries from UF, as they are (which
     later in the pipeline, will be converted back to how OpenCV expects them)
     """
+
+    rect_heap = []
+    unified_rects = uf(num_rects)
+
+    for x in range(min_x, max_x):
+        # prune any outdated rects from the current_rects
+        while True:
+            if len(rect_heap) == 0:
+                break
+            if rect_heap[0][0] == x - 1:  # means we are at the edge
+                heapq.heappop(rect_heap)
+            else:
+                break
+
+        # get the potential list of rectangles along this axis
+        temp_rects = rects[x]
+        # for each rect in the current_rects priority queue,
+        # check each of these entries against each in temp_rects and perform
+        # union if required
+        # this is likely going to be a bottle neck
+        for rectA in rect_heap:
+            for rectB in temp_rects:
+                if rect_overlap(rectA[1], rectB):
+                    unified_rects.union(rectA[1], rectB)
+
+            # add the rectB to the heap now.
+            for rectB in temp_rects:
+                heapq.heappush(rect_heap, (rectB.right, rectB))
+
+    return unified_rects
 
 
 def thresh_callback(val):
