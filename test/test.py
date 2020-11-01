@@ -77,7 +77,7 @@ class TestBox(unittest.TestCase):
         # Bottom left
         self.assertTrue(r.Rectangle.intersect(a, f))
 
-    def test_types_of_none_overlap(self):
+    def test_types_of_non_overlap(self):
         """
         Test different types of non-overlap
         """
@@ -94,6 +94,24 @@ class TestBox(unittest.TestCase):
         self.assertFalse(r.Rectangle.intersect(a, e))
         self.assertFalse(r.Rectangle.intersect(a, f))
         self.assertFalse(r.Rectangle.intersect(a, g))
+
+    def test_conglomeration(self):
+        """
+        Test that the complete bounding rectangle is returned.
+        """
+        # top, left, bottom, right
+        a = r.Rectangle(2, 2, 8, 8)
+        c = r.Rectangle(4, 4, 8, 8)
+        d = r.Rectangle(2, 2, 6, 6)
+        e = r.Rectangle(2, 4, 8, 8)
+        f = r.Rectangle(2, 2, 8, 6)
+
+        g = r.Rectangle(2, 2, 16, 16)
+        h = r.Rectangle(15, 15, 16, 16)
+
+        self.assertEqual(a, b.merge_rects([a, c, d, e, f]))
+
+        self.assertEqual(g, b.merge_rects([a, h]))
 
 
 if __name__ == "__main__":

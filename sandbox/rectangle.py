@@ -23,3 +23,13 @@ class Rectangle:
             and rectA.bottom > rectB.top
         )
         return ret
+
+    def __eq__(self, other) -> bool:
+        if isinstance(other, Rectangle):
+            return (
+                self.top == other.top
+                and self.left == other.left
+                and self.right == other.right
+                and self.bottom == other.bottom
+            )
+        return False

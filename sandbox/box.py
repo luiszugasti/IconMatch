@@ -12,16 +12,12 @@ rng.seed(12345)
 
 def merge_rects(rects) -> dict:
     """
-    Merges a list of rects into one conglomerate rect.
+    Merges a list of rects into one conglomerate rect in "std".
     """
 
     # for now, just parse through the list, obtaining the smallest
     # value for top, left, and biggest value for bottom, right
-    ans = {}
-    ans.top = sys.maxsize
-    ans.left = sys.maxsize
-    ans.bottom = 0
-    ans.right = 0
+    ans = r.Rectangle(sys.maxsize, sys.maxsize, 0, 0)
 
     for rect in rects:
         if rect.left < ans.left:
@@ -30,8 +26,8 @@ def merge_rects(rects) -> dict:
             ans.top = rect.top
         if rect.bottom > ans.bottom:
             ans.bottom = rect.bottom
-        if rect.right > ans.bottom:
-            ans.bottom = rect.bottom
+        if rect.right > ans.right:
+            ans.right = rect.right
 
     return ans
 
@@ -62,7 +58,7 @@ def std_rect_to_cv(rect):
 
 def rect_list_to_dict(rects):
     """
-    Takes a list of rects and returns their dictionary representation for
+    Takes a list of cv rects and returns their dictionary representation for
     simple filtering.
     """
     rec_dict = {}
