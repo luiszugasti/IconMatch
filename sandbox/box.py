@@ -5,39 +5,19 @@ import random as rng
 import heapq
 from icondetection.weighted_quick_unionUF import WeightedQuickUnionUF as uf
 import sys
+import sandbox.rectangle as r
 
 rng.seed(12345)
 
 
-# rect_overlap assumes that rect1 is to the left of rect2,
-# and is in cv2 format:
-#   | x, y
-#   | where rect is defined by top left = (rect[0], rect[1])
-#   |                          bottom right = (rect[0] + rect[2], rect[1] + rect[3]
-def rect_overlap(rectA, rectB):
-    """
-    Determines if rectA, rectB are overlapping in cartesian space.
-    Modified slightly from:
-    https://stackoverflow.com/questions/306316/determine-if-two-rectangles-overlap-each-other#306332
-    """
-
-    ret = (
-        rectA.left < rectB.right
-        and rectA.right > rectB.left
-        and rectA.top > rectB.bottom
-        and rectA.bottom < rectB.top
-    )
-    return ret
-
-
-def merge_rects(rects):
+def merge_rects(rects) -> dict:
     """
     Merges a list of rects into one conglomerate rect.
     """
 
     # for now, just parse through the list, obtaining the smallest
     # value for top, left, and biggest value for bottom, right
-    ans = None
+    ans = {}
     ans.top = sys.maxsize
     ans.left = sys.maxsize
     ans.bottom = 0
@@ -68,11 +48,7 @@ def cv_rect_to_std(rect):
     |
     y +
     """
-    new_rect = None
-    new_rect.top = rect[0]
-    new_rect.left = rect[1]
-    new_rect.bottom = rect[0] + rect[2]
-    new_rect.right = rect[1] + rect[3]
+    new_rect = r.Rectangle(rect[0], rect[1], rect[0] + rect[2], rect[1] + rect[3])
     return new_rect
 
 
@@ -214,23 +190,26 @@ def thresh_callback(val):
     cv.imshow("Contours", drawing)
 
 
-parser = argparse.ArgumentParser(
-    description="Code for Creating Bounding boxes and circles for contours tutorial."
-)
-parser.add_argument("--input", help="Path to input image.")
-args = parser.parse_args()
-src = cv.imread(args.input)
-if src is None:
-    print("Could not open or find the image:", args.input)
-    exit(0)
-# Convert image to gray and blur it
-src_gray = cv.cvtColor(src, cv.COLOR_BGR2GRAY)
-src_gray = cv.blur(src_gray, (3, 3))
-source_window = "Source"
-cv.namedWindow(source_window)
-cv.imshow(source_window, src)
-max_thresh = 255
-thresh = 100  # initial threshold
-cv.createTrackbar("Canny thresh:", source_window, thresh, max_thresh, thresh_callback)
-thresh_callback(thresh)
-cv.waitKey()
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(
+        description="Code for Creating Bounding boxes and circles for contours tutorial."
+    )
+    parser.add_argument("--input", help="Path to input image.")
+    args = parser.parse_args()
+    src = cv.imread(args.input)
+    if src is None:
+        print("Could not open or find the image:", args.input)
+        exit(0)
+    # Convert image to gray and blur it
+    src_gray = cv.cvtColor(src, cv.COLOR_BGR2GRAY)
+    src_gray = cv.blur(src_gray, (3, 3))
+    source_window = "Source"
+    cv.namedWindow(source_window)
+    cv.imshow(source_window, src)
+    max_thresh = 255
+    thresh = 100  # initial threshold
+    cv.createTrackbar(
+        "Canny thresh:", source_window, thresh, max_thresh, thresh_callback
+    )
+    thresh_callback(thresh)
+    cv.waitKey()
