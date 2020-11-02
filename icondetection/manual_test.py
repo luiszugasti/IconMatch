@@ -1,6 +1,7 @@
 from PIL import ImageGrab
 from pynput import mouse
-from helpers import runSIFT, saveImg
+import icondetection
+from icondetection.helpers import runSIFT, saveImg
 
 
 def main():

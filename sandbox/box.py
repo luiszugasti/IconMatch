@@ -3,7 +3,7 @@ import numpy as np
 import argparse
 import random as rng
 import heapq
-from icondetection.weighted_quick_unionUF import WeightedQuickUnionUF as uf
+import icondetection.weighted_quick_unionUF
 import sys
 import sandbox.rectangle as r
 
@@ -140,7 +140,13 @@ def group_rects(cv_rects, min_x, max_x):
             for rectB in temp_rects:
                 heapq.heappush(rect_heap, (rectB.right, rectB))
 
-    return unified_rects
+    # take the rects belonging to a dictionary
+    # and determine the conglomerate rectangle for each one of them
+    grouped_rects = []
+    for group in unified_rects.get_unions():
+        grouped_rects.append(std_rect_to_cv(merge_rects(group)))
+
+    return grouped_rects
 
 
 def thresh_callback(val):
@@ -188,14 +194,20 @@ def thresh_callback(val):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description="Code for Creating Bounding boxes and circles for contours tutorial."
+        description="Code for Creating Bounding boxes using Canny Edge Detector."
     )
+
     parser.add_argument("--input", help="Path to input image.")
+    parser.add_argument(
+        "--xmin", help="minimum range for horizontal axis scanning (typically zero)"
+    )
+    parser.add_argument("--xmin", help="maximum range for horizontal axis scanning")
     args = parser.parse_args()
     src = cv.imread(args.input)
     if src is None:
         print("Could not open or find the image:", args.input)
         exit(0)
+
     # Convert image to gray and blur it
     src_gray = cv.cvtColor(src, cv.COLOR_BGR2GRAY)
     src_gray = cv.blur(src_gray, (3, 3))

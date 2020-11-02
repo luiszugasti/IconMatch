@@ -77,13 +77,22 @@ class WeightedQuickUnionUF:
         self.count = self.count - 1
         pass
 
+    def get_unions(self):
+        """
+        Retrieves and returns all groups, according to their parent
+        """
+        components = {}
+        for index in range(self.parent):
+            # get parent component
+            index_of_parent = find(index)
+            parent = self.parent[index_of_parent][1]
 
-if __name__ == "__main__":
-    n = int(input("Enter size"))
-    uf = WeightedQuickUnionUF(n)
-    while True:
-        p = int(input("enter a p"))
-        q = int(input("enter a q"))
-        if uf.connected(p, q):
-            continue
-        uf.union(p, q)
+            # add it to the mapping, or add the current component to its list
+            if parent not in components:
+                components[parent] = [self.parent[index][1]]
+            else:
+                parent_list = components[parent]
+                parent_list.append(self.parent[index][1])
+                components[parent] = parent_list
+
+        return components
