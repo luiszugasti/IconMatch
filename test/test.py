@@ -151,10 +151,6 @@ class TestBox(unittest.TestCase):
 
         self.assertEqual(g, b.merge_rects([a, h]))
 
-        # delete it
-        me = uf(1, [a])
-        print(me)
-
 
 if __name__ == "__main__":
     unittest.main()

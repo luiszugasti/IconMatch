@@ -33,3 +33,14 @@ class Rectangle:
                 and self.bottom == other.bottom
             )
         return False
+
+    # Not an absolute comparison.
+    def __lt__(self, other) -> bool:
+        if self.get_area() > other.get_area():
+            return True
+        return False
+
+    def get_area(self):
+        if not hasattr(self, "area"):
+            self.area = (self.right - self.left) * (self.top - self.bottom)
+        return self.area

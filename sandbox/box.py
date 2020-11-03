@@ -5,7 +5,7 @@ import random as rng
 import heapq
 from icondetection.weighted_quick_unionUF import WeightedQuickUnionUF as uf
 import sys
-import sandbox.rectangle as r
+from sandbox.rectangle import Rectangle
 
 rng.seed(12345)
 
@@ -17,7 +17,7 @@ def merge_rects(rects) -> dict:
 
     # for now, just parse through the list, obtaining the smallest
     # value for top, left, and biggest value for bottom, right
-    ans = r.Rectangle(sys.maxsize, sys.maxsize, 0, 0)
+    ans = Rectangle(sys.maxsize, sys.maxsize, 0, 0)
 
     for rect in rects:
         if rect.left < ans.left:
@@ -44,7 +44,7 @@ def cv_rect_to_std(rect):
     |
     y +
     """
-    new_rect = r.Rectangle(rect[0], rect[1], rect[0] + rect[2], rect[1] + rect[3])
+    new_rect = Rectangle(rect[0], rect[1], rect[0] + rect[2], rect[1] + rect[3])
     return new_rect
 
 
@@ -61,11 +61,20 @@ def rect_list_to_dict(rects):
     Takes a list of cv rects and returns their dictionary representation for
     simple filtering.
     """
-    rec_dict = {}
+    rec_dict = (
+        {}
+    )  # POTENTIALLY PROBLEMATIC: necessarily has to be a list of (index, rects)
     rec_list = [None] * len(rects)
     for i in range(len(rects)):
         rect_mod = cv_rect_to_std(rects[i])
-        rec_dict[rect_mod.left] = rect_mod
+
+        if rect_mod.left in rec_dict:
+            tmp_list = rec_dict[rect_mod.left]
+            tmp_list.append((i, rect_mod))
+            rec_dict[rect_mod.left] = tmp_list
+        else:
+            rec_dict[rect_mod.left] = [(i, rect_mod)]
+
         rec_list[i] = rect_mod
 
     return (rec_dict, rec_list)
@@ -73,49 +82,14 @@ def rect_list_to_dict(rects):
 
 def group_rects(cv_rects, min_x, max_x):
     """
-    Accepts a list of rects. This list is converted to a dictionary in
-    this format:
-    left-coordinate: [
-        {left, right, top, bottom},
-        {left, right, top, bottom},
-        .
-        .
-        .
-        {left, right, top, bottom}
-    ]
-    And scans the complete (min_x, max_x) space to group rectangles.
-
-    More technically, I am tackling the overlapping rectangle problem using a
-    scanning line from min_x to min_max. This is why it's important for the rect
-    dictionary to have keys as the left most coordinate of a rectangle; this
-    makes lookups pretty easy depending on what level I'm scanning in.
-
-    I am also maintaining a UnionFind structure of all the unique components.
-    What UF allows me to do is to efficiently add rectangles to one component
-    or to another, all the while maintaining the top left and bottom right
-    coordinates of the conglomerate rectangle <<<TODO
-
-    While scanning, I am maintaining a min heap of all rectangle's right most
-    endpoints as key (since when the scanning index is greater than the right most
-    endpoint, we are no longer in that rectangle) and the actual rectangle as an
-    entry.
-
-    The main objective here is, any time there is a new rectangle added to the
-    mean heap, to iterate through the mean heap, checking if the rectangles
-    overlap.
-        | If they do: we perform a union() call on this rectangle pair.
-
-    We then continue checking each rectangle pair and once we are done, we add
-    the current rectangle to the min heap.
-
-    The function itself will return the entries from UF, as they are (which
-    later in the pipeline, will be converted back to how OpenCV expects them)
+    Accepts a list of rects in openCV format, and groups them according to their
+    overlapping locations.
     """
+
     rect_dict, rect_list = rect_list_to_dict(cv_rects)
     rect_heap = []
     unified_rects = uf(len(rect_list), rect_list)
 
-    # TODO: This could be faster... EPI pg. 216...
     for x in range(min_x, max_x):
 
         # prune any outdated rects from the current_rects
@@ -127,28 +101,24 @@ def group_rects(cv_rects, min_x, max_x):
             else:
                 break
 
-        # get the potential list of rectangles along this axis
+        # get rectangles in this index
         if x in rect_dict:
             temp_rects = rect_dict[x]
         else:
-            # we don't have any rects, and we don't need to iterate
             continue
 
-        # for each rect in the current_rects priority queue,
-        # check each of these entries against each in temp_rects and perform
-        # union if required
-        # this is likely going to be a bottle neck
+        # perform intersection
         for rectA in rect_heap:
             for rectB in temp_rects:
-                if rect_overlap(rectA[1], rectB):
-                    unified_rects.union(rectA[1], rectB)
+                if Rectangle.intersect(rectA[1], rectB[1]):
+                    # TODO: have to send INDICES, not OBJECTS
+                    unified_rects.union(rectA[2], rectB[0])
 
-            # add the rectB to the heap now.
-            for rectB in temp_rects:
-                heapq.heappush(rect_heap, (rectB.right, rectB))
+        # push new elements onto heap
+        for rectB in temp_rects:
+            heapq.heappush(rect_heap, (rectB[1].right, rectB[1], rectB[0]))
 
-    # take the rects belonging to a dictionary
-    # and determine the conglomerate rectangle for each one of them
+    # perform groupings
     grouped_rects = []
     unions = unified_rects.get_unions()
     for group in unions.values():
@@ -184,7 +154,6 @@ def thresh_callback(val):
         (canny_output.shape[0], canny_output.shape[1], 3), dtype=np.uint8
     )
 
-    # quick insertion of my code!
     new_boxes = group_rects(boundRect, 0, args.xmax)
     boundRect = new_boxes
 

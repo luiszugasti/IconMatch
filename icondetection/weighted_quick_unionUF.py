@@ -90,13 +90,18 @@ class WeightedQuickUnionUF:
 
             # add it to the mapping, or add the current component to its list
             if index_parent not in components:
-                components[index_parent] = [
-                    parent,
-                    child,
-                ]
+                if index_element == index_parent:
+                    components[index_parent] = [
+                        child,
+                    ]
+                else:
+                    components[index_parent] = [
+                        parent,
+                        child,
+                    ]
             else:
-                parent_list = components[parent]
+                parent_list = components[index_parent]
                 parent_list.append(child)
-                components[parent] = parent_list
+                components[index_parent] = parent_list
 
         return components
