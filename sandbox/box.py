@@ -3,7 +3,7 @@ import numpy as np
 import argparse
 import random as rng
 import heapq
-import icondetection.weighted_quick_unionUF
+from icondetection.weighted_quick_unionUF import WeightedQuickUnionUF as uf
 import sys
 import sandbox.rectangle as r
 
@@ -64,11 +64,11 @@ def rect_list_to_dict(rects):
     rec_dict = {}
     rec_list = [None] * len(rects)
     for i in range(len(rects)):
-        rect_mod = cv_rect_to_std(rect)
+        rect_mod = cv_rect_to_std(rects[i])
         rec_dict[rect_mod.left] = rect_mod
         rec_list[i] = rect_mod
 
-    return (rec_dict, rect_mod)
+    return (rec_dict, rec_list)
 
 
 def group_rects(cv_rects, min_x, max_x):
@@ -111,11 +111,13 @@ def group_rects(cv_rects, min_x, max_x):
     The function itself will return the entries from UF, as they are (which
     later in the pipeline, will be converted back to how OpenCV expects them)
     """
-    rect_list, rect_dict = rect_list_to_dict(cv_rects)
+    rect_dict, rect_list = rect_list_to_dict(cv_rects)
     rect_heap = []
     unified_rects = uf(len(rect_list), rect_list)
 
+    # TODO: This could be faster... EPI pg. 216...
     for x in range(min_x, max_x):
+
         # prune any outdated rects from the current_rects
         while True:
             if len(rect_heap) == 0:
@@ -126,7 +128,12 @@ def group_rects(cv_rects, min_x, max_x):
                 break
 
         # get the potential list of rectangles along this axis
-        temp_rects = cv_rects[x]
+        if x in rect_dict:
+            temp_rects = rect_dict[x]
+        else:
+            # we don't have any rects, and we don't need to iterate
+            continue
+
         # for each rect in the current_rects priority queue,
         # check each of these entries against each in temp_rects and perform
         # union if required
@@ -143,7 +150,8 @@ def group_rects(cv_rects, min_x, max_x):
     # take the rects belonging to a dictionary
     # and determine the conglomerate rectangle for each one of them
     grouped_rects = []
-    for group in unified_rects.get_unions():
+    unions = unified_rects.get_unions()
+    for group in unions.values():
         grouped_rects.append(std_rect_to_cv(merge_rects(group)))
 
     return grouped_rects
@@ -176,7 +184,11 @@ def thresh_callback(val):
         (canny_output.shape[0], canny_output.shape[1], 3), dtype=np.uint8
     )
 
-    for i in range(len(contours)):
+    # quick insertion of my code!
+    new_boxes = group_rects(boundRect, 0, args.xmax)
+    boundRect = new_boxes
+
+    for i in range(len(boundRect)):
         color = (rng.randint(0, 256), rng.randint(0, 256), rng.randint(0, 256))
         cv.rectangle(
             drawing,
@@ -199,9 +211,8 @@ if __name__ == "__main__":
 
     parser.add_argument("--input", help="Path to input image.")
     parser.add_argument(
-        "--xmin", help="minimum range for horizontal axis scanning (typically zero)"
+        "--xmax", help="maximum range for horizontal axis scanning", type=int
     )
-    parser.add_argument("--xmin", help="maximum range for horizontal axis scanning")
     args = parser.parse_args()
     src = cv.imread(args.input)
     if src is None:

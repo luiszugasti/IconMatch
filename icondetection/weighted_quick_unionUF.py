@@ -82,17 +82,21 @@ class WeightedQuickUnionUF:
         Retrieves and returns all groups, according to their parent
         """
         components = {}
-        for index in range(self.parent):
+        for index_element in range(len(self.parent)):
             # get parent component
-            index_of_parent = find(index)
-            parent = self.parent[index_of_parent][1]
+            index_parent = self.find(index_element)
+            parent = self.parent[index_parent][1]
+            child = self.parent[index_element][1]
 
             # add it to the mapping, or add the current component to its list
-            if parent not in components:
-                components[parent] = [self.parent[index][1]]
+            if index_parent not in components:
+                components[index_parent] = [
+                    parent,
+                    child,
+                ]
             else:
                 parent_list = components[parent]
-                parent_list.append(self.parent[index][1])
+                parent_list.append(child)
                 components[parent] = parent_list
 
         return components

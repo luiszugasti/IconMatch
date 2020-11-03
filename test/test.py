@@ -14,30 +14,68 @@ class TestSIFT(unittest.TestCase):
 
 class TestUF(unittest.TestCase):
     """
-    Simulating many of the tests from the Princeton Course.
+    Test the base methods of Union Find.
     """
 
-    def test_uf_ints(self):
-        a = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-        t = uf(4, a[:4])
-        self.assertEqual(t.count, 4)
-        t.union(0, 3)
-        self.assertEqual(t.count, 3)
-        t.union(3, 0)
-        self.assertEqual(t.count, 3)
-        t.union(2, 0)
-        self.assertEqual(t.count, 2)
-        t.union(1, 0)
-        self.assertEqual(t.count, 1)
-        self.assertTrue(t.connected(1, 0))
+    def setUp(self):
+        self.a = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+        self.t = uf(4, self.a[:4])
+        self.u = uf(10, self.a)
 
-        u = uf(10, a)
-        self.assertEqual(u.count, 10)
-        u.union(0, 8)
-        u.union(3, 5)
-        u.union(4, 7)
-        u.union(1, 9)
-        self.assertEqual(u.count, 6)
+    def test_count(self):
+        self.assertEqual(self.t.count, 4)
+        self.t.union(0, 3)
+
+        self.assertEqual(self.t.count, 3)
+        self.t.union(3, 0)
+
+        self.assertEqual(self.t.count, 3)
+        self.t.union(2, 0)
+
+        self.assertEqual(self.t.count, 2)
+        self.t.union(1, 0)
+
+        self.assertEqual(self.t.count, 1)
+        self.assertTrue(self.t.connected(1, 0))
+
+        self.assertEqual(self.u.count, 10)
+
+        self.u.union(0, 8)
+        self.u.union(3, 5)
+        self.u.union(4, 7)
+        self.u.union(1, 9)
+        self.assertEqual(self.u.count, 6)
+
+    def test_find(self):
+        # p, q << all things equal, p will be picked
+        self.t.union(0, 3)
+        self.assertEqual(self.t.find(3), 0, "Parent should be 0")
+
+        self.t.union(3, 0)
+        self.assertEqual(self.t.find(3), 0, "No change is expected")
+        self.assertEqual(self.t.size[0], 2, "Parent 0 should have 2 components")
+
+        self.t.union(2, 0)
+        self.assertEqual(self.t.size[0], 3, "Parent 0 should have 3 components")
+
+        self.t.union(1, 0)
+        self.assertEqual(self.t.size[0], 4, "Parent 0 should have 4 components")
+
+    def test_get_unions(self):
+        self.u.union(0, 9)
+        self.u.union(1, 8)
+        self.u.union(2, 7)
+        self.u.union(3, 6)
+        self.u.union(4, 5)
+
+        unions_u = self.u.get_unions()
+        self.assertCountEqual([0, 1, 2, 3, 4], unions_u.keys())
+
+        self.t.union(0, 3)
+        self.t.union(2, 0)
+        self.t.union(1, 0)
+        unions_t = self.t.get_unions()
+        self.assertCountEqual([0], unions_t.keys())
 
 
 class TestBox(unittest.TestCase):
