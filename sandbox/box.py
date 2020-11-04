@@ -15,8 +15,6 @@ def merge_rects(rects) -> dict:
     Merges a list of rects into one conglomerate rect in "std".
     """
 
-    # for now, just parse through the list, obtaining the smallest
-    # value for top, left, and biggest value for bottom, right
     ans = Rectangle(sys.maxsize, sys.maxsize, 0, 0)
 
     for rect in rects:
@@ -32,10 +30,10 @@ def merge_rects(rects) -> dict:
     return ans
 
 
-def cv_rect_to_std(rect):
+def rect_cv_to_cartesian(rect):
     """
-    Convert rectangle from CV representation to something easier to work with
-    Keep in mind that y increases from top to bottom!
+    Converts a rectangle from CV representation to cartesian coordinates.
+    Note: Keep in mind that y increases from top to bottom!
     0 ----------------- x +
     |
     |
@@ -48,7 +46,7 @@ def cv_rect_to_std(rect):
     return new_rect
 
 
-def std_rect_to_cv(rect):
+def rect_cartesian_to_cv(rect):
     """
     Convert rectangle from Std representation back to CV representation
     """
@@ -61,23 +59,25 @@ def rect_list_to_dict(rects):
     Takes a list of cv rects and returns their dictionary representation for
     simple filtering.
     """
-    rec_dict = (
-        {}
-    )  # POTENTIALLY PROBLEMATIC: necessarily has to be a list of (index, rects)
-    rec_list = [None] * len(rects)
-    for i in range(len(rects)):
-        rect_mod = cv_rect_to_std(rects[i])
+    # POTENTIALLY PROBLEMATIC: necessarily has to be a list of (index, rects)
+    rect_dict = {}
+    rect_list = [None] * len(rects)
 
-        if rect_mod.left in rec_dict:
-            tmp_list = rec_dict[rect_mod.left]
-            tmp_list.append((i, rect_mod))
-            rec_dict[rect_mod.left] = tmp_list
+    for rect_index in range(len(rects)):
+        temp_rect = rect_cv_to_cartesian(rects[rect_index])
+
+        # step to modify dictionary
+        if temp_rect.left in rect_dict:
+            tmp_list = rect_dict[temp_rect.left]
+            tmp_list.append((rect_index, temp_rect))
+            rect_dict[temp_rect.left] = tmp_list
         else:
-            rec_dict[rect_mod.left] = [(i, rect_mod)]
+            rect_dict[temp_rect.left] = [(rect_index, temp_rect)]
 
-        rec_list[i] = rect_mod
+        # step to modify list
+        rect_list[rect_index] = temp_rect
 
-    return (rec_dict, rec_list)
+    return (rect_dict, rect_list)
 
 
 def group_rects(cv_rects, min_x, max_x):
@@ -111,7 +111,6 @@ def group_rects(cv_rects, min_x, max_x):
         for rectA in rect_heap:
             for rectB in temp_rects:
                 if Rectangle.intersect(rectA[1], rectB[1]):
-                    # TODO: have to send INDICES, not OBJECTS
                     unified_rects.union(rectA[2], rectB[0])
 
         # push new elements onto heap
@@ -122,21 +121,25 @@ def group_rects(cv_rects, min_x, max_x):
     grouped_rects = []
     unions = unified_rects.get_unions()
     for group in unions.values():
-        grouped_rects.append(std_rect_to_cv(merge_rects(group)))
+        grouped_rects.append(rect_cartesian_to_cv(merge_rects(group)))
 
     return grouped_rects
 
 
-def thresh_callback(val):
+def threshold_callback(val):
     """
     Function modified from this tutorial:
     https://docs.opencv.org/3.4/da/d0c/tutorial_bounding_rects_circles.html
     Takes a value of threshold for the canny edge detector and finds the
     bounding rectangles of appropriate edges within an image.
     """
-    threshold = val
+    multiplier = 2
+    min_threshold = val
+    max_threshold = int(min_threshold * multiplier)
+    src = cv.imread(args.input)
+    src2 = src.copy()
 
-    canny_output = cv.Canny(src_gray, threshold, threshold * 2)
+    canny_output = cv.Canny(src_gray, min_threshold, max_threshold)
 
     _, contours, _ = cv.findContours(canny_output, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
 
@@ -145,32 +148,51 @@ def thresh_callback(val):
     centers = [None] * len(contours)
     radius = [None] * len(contours)
 
-    for i, c in enumerate(contours):
-        contours_poly[i] = cv.approxPolyDP(c, 3, True)
-        boundRect[i] = cv.boundingRect(contours_poly[i])
-        centers[i], radius[i] = cv.minEnclosingCircle(contours_poly[i])
+    for index, contour in enumerate(contours):
+        contours_poly[index] = cv.approxPolyDP(contour, 3, True)
+        boundRect[index] = cv.boundingRect(contours_poly[index])
+        centers[index], radius[index] = cv.minEnclosingCircle(contours_poly[index])
 
-    drawing = np.zeros(
+    drawing_all_rects = np.zeros(
         (canny_output.shape[0], canny_output.shape[1], 3), dtype=np.uint8
     )
 
-    new_boxes = group_rects(boundRect, 0, args.xmax)
-    boundRect = new_boxes
+    drawing_grouped_rects = np.zeros(
+        (canny_output.shape[0], canny_output.shape[1], 3), dtype=np.uint8
+    )
 
-    for i in range(len(boundRect)):
+    grouped_rects = group_rects(boundRect, 0, args.xmax)
+
+    for index in range(len(boundRect)):
         color = (rng.randint(0, 256), rng.randint(0, 256), rng.randint(0, 256))
         cv.rectangle(
-            drawing,
-            (int(boundRect[i][0]), int(boundRect[i][1])),
+            src,
+            (int(boundRect[index][0]), int(boundRect[index][1])),
             (
-                int(boundRect[i][0] + boundRect[i][2]),
-                int(boundRect[i][1] + boundRect[i][3]),
+                int(boundRect[index][0] + boundRect[index][2]),
+                int(boundRect[index][1] + boundRect[index][3]),
             ),
             color,
             2,
         )
 
-    cv.imshow("Contours", drawing)
+    # TODO: may not need to have specialized conversion from different rect
+    #       types
+    for index in range(len(grouped_rects)):
+        color = (rng.randint(0, 256), rng.randint(0, 256), rng.randint(0, 256))
+        cv.rectangle(
+            src2,
+            (int(grouped_rects[index][0]), int(grouped_rects[index][1])),
+            (
+                int(grouped_rects[index][0] + grouped_rects[index][2]),
+                int(grouped_rects[index][1] + grouped_rects[index][3]),
+            ),
+            color,
+            2,
+        )
+
+    cv.imshow("Contours", src)
+    cv.imshow("Groupings", src2)
 
 
 if __name__ == "__main__":
@@ -182,22 +204,24 @@ if __name__ == "__main__":
     parser.add_argument(
         "--xmax", help="maximum range for horizontal axis scanning", type=int
     )
+
     args = parser.parse_args()
-    src = cv.imread(args.input)
-    if src is None:
-        print("Could not open or find the image:", args.input)
+    src = cv.imread(acv.imwrite("groupings.png", src2)not open or find the image:", args.input)
         exit(0)
 
     # Convert image to gray and blur it
     src_gray = cv.cvtColor(src, cv.COLOR_BGR2GRAY)
     src_gray = cv.blur(src_gray, (3, 3))
+
     source_window = "Source"
     cv.namedWindow(source_window)
     cv.imshow(source_window, src)
+
     max_thresh = 255
     thresh = 100  # initial threshold
+
     cv.createTrackbar(
-        "Canny thresh:", source_window, thresh, max_thresh, thresh_callback
+        "Canny threshold:", source_window, thresh, max_thresh, threshold_callback
     )
-    thresh_callback(thresh)
+    threshold_callback(thresh)
     cv.waitKey()
