@@ -4,54 +4,9 @@ import argparse
 import random as rng
 import heapq
 from icondetection.weighted_quick_unionUF import WeightedQuickUnionUF as uf
-import sys
-from sandbox.rectangle import Rectangle
+from icondetection.rectangle import Rectangle
 
 rng.seed(12345)
-
-
-def merge_rects(rects) -> dict:
-    """
-    Merges a list of rects into one conglomerate rect in "std".
-    """
-
-    ans = Rectangle(sys.maxsize, sys.maxsize, 0, 0)
-
-    for rect in rects:
-        if rect.left < ans.left:
-            ans.left = rect.left
-        if rect.top < ans.top:
-            ans.top = rect.top
-        if rect.bottom > ans.bottom:
-            ans.bottom = rect.bottom
-        if rect.right > ans.right:
-            ans.right = rect.right
-
-    return ans
-
-
-def rect_cv_to_cartesian(rect):
-    """
-    Converts a rectangle from CV representation to cartesian coordinates.
-    Note: Keep in mind that y increases from top to bottom!
-    0 ----------------- x +
-    |
-    |
-    |
-    |
-    |
-    y +
-    """
-    new_rect = Rectangle(rect[0], rect[1], rect[0] + rect[2], rect[1] + rect[3])
-    return new_rect
-
-
-def rect_cartesian_to_cv(rect):
-    """
-    Convert rectangle from Std representation back to CV representation
-    """
-    new_rect = (rect.top, rect.left, rect.bottom - rect.top, rect.right - rect.left)
-    return new_rect
 
 
 def rect_list_to_dict(rects):
@@ -64,7 +19,7 @@ def rect_list_to_dict(rects):
     rect_list = [None] * len(rects)
 
     for rect_index in range(len(rects)):
-        temp_rect = rect_cv_to_cartesian(rects[rect_index])
+        temp_rect = Rectangle.rect_cv_to_cartesian(rects[rect_index])
 
         # step to modify dictionary
         if temp_rect.left in rect_dict:
@@ -121,7 +76,9 @@ def group_rects(cv_rects, min_x, max_x):
     grouped_rects = []
     unions = unified_rects.get_unions()
     for group in unions.values():
-        grouped_rects.append(rect_cartesian_to_cv(merge_rects(group)))
+        grouped_rects.append(
+            Rectangle.rect_cartesian_to_cv(Rectangle.merge_rects(group))
+        )
 
     return grouped_rects
 
@@ -134,6 +91,7 @@ def threshold_callback(val):
     bounding rectangles of appropriate edges within an image.
     """
     multiplier = 2
+    contour_accuracy = 3
     min_threshold = val
     max_threshold = int(min_threshold * multiplier)
     src = cv.imread(args.input)
@@ -149,7 +107,7 @@ def threshold_callback(val):
     radius = [None] * len(contours)
 
     for index, contour in enumerate(contours):
-        contours_poly[index] = cv.approxPolyDP(contour, 3, True)
+        contours_poly[index] = cv.approxPolyDP(contour, contour_accuracy, True)
         boundRect[index] = cv.boundingRect(contours_poly[index])
         centers[index], radius[index] = cv.minEnclosingCircle(contours_poly[index])
 
@@ -161,7 +119,7 @@ def threshold_callback(val):
         (canny_output.shape[0], canny_output.shape[1], 3), dtype=np.uint8
     )
 
-    grouped_rects = group_rects(boundRect, 0, args.xmax)
+    grouped_rects = group_rects(boundRect, 0, src.shape[1])
 
     for index in range(len(boundRect)):
         color = (rng.randint(0, 256), rng.randint(0, 256), rng.randint(0, 256))
@@ -201,12 +159,11 @@ if __name__ == "__main__":
     )
 
     parser.add_argument("--input", help="Path to input image.")
-    parser.add_argument(
-        "--xmax", help="maximum range for horizontal axis scanning", type=int
-    )
 
     args = parser.parse_args()
-    src = cv.imread(acv.imwrite("groupings.png", src2)not open or find the image:", args.input)
+    src = cv.imread(args.input)
+    if src is None:
+        print("Could not open or find the image:", args.input)
         exit(0)
 
     # Convert image to gray and blur it
