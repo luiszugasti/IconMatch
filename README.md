@@ -72,16 +72,16 @@ Luis Zugasti - [@luis\_\_zugasti](https://twitter.com/luis__zugasti)
 
 Project Link: [https://github.com/luiszugasti/IconMatch](https://github.com/luiszugasti/IconMatch)
 
-[contributors-shield]: https://img.shields.io/github/contributors/luiszugasti/repo.svg?style=flat-square
-[contributors-url]: https://github.com/luiszugasti/repo/graphs/contributors
-[forks-shield]: https://img.shields.io/github/forks/luiszugasti/repo.svg?style=flat-square
-[forks-url]: https://github.com/luiszugasti/repo/network/members
-[stars-shield]: https://img.shields.io/github/stars/luiszugasti/repo.svg?style=flat-square
-[stars-url]: https://github.com/luiszugasti/repo/stargazers
-[issues-shield]: https://img.shields.io/github/issues/luiszugasti/repo.svg?style=flat-square
-[issues-url]: https://github.com/luiszugasti/repo/issues
-[license-shield]: https://img.shields.io/github/license/luiszugasti/repo.svg?style=flat-square
-[license-url]: https://github.com/luiszugasti/repo/blob/main/LICENSE.txt
+[contributors-shield]: https://img.shields.io/github/contributors/luiszugasti/IconMatch.svg?style=flat-square
+[contributors-url]: https://github.com/luiszugasti/IconMatch/graphs/contributors
+[forks-shield]: https://img.shields.io/github/forks/luiszugasti/IconMatch.svg?style=flat-square
+[forks-url]: https://github.com/luiszugasti/IconMatch/network/members
+[stars-shield]: https://img.shields.io/github/stars/luiszugasti/IconMatch.svg?style=flat-square
+[stars-url]: https://github.com/luiszugasti/IconMatch/stargazers
+[issues-shield]: https://img.shields.io/github/issues/luiszugasti/IconMatch.svg?style=flat-square
+[issues-url]: https://github.com/luiszugasti/IconMatch/issues
+[license-shield]: https://img.shields.io/github/license/luiszugasti/IconMatch.svg?style=flat-square
+[license-url]: https://github.com/luiszugasti/IconMatch/blob/main/LICENSE.txt
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=flat-square&logo=linkedin&colorB=555
 [linkedin-url]: https://linkedin.com/in/luiszugasti
 [product-screenshot]: images/screenshot.png
