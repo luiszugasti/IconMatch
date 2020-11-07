@@ -81,7 +81,7 @@ Project Link: [https://github.com/luiszugasti/IconMatch](https://github.com/luis
 [issues-shield]: https://img.shields.io/github/issues/luiszugasti/repo.svg?style=flat-square
 [issues-url]: https://github.com/luiszugasti/repo/issues
 [license-shield]: https://img.shields.io/github/license/luiszugasti/repo.svg?style=flat-square
-[license-url]: https://github.com/luiszugasti/repo/blob/master/LICENSE.txt
+[license-url]: https://github.com/luiszugasti/repo/blob/main/LICENSE.txt
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=flat-square&logo=linkedin&colorB=555
 [linkedin-url]: https://linkedin.com/in/luiszugasti
 [product-screenshot]: images/screenshot.png
