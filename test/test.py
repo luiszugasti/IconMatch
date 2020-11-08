@@ -1,7 +1,7 @@
 import unittest
 from icondetection.weighted_quick_unionUF import WeightedQuickUnionUF as uf
-import sandbox.box as b
-import sandbox.rectangle as r
+import icondetection.box as b
+import icondetection.rectangle as r
 
 
 class TestSIFT(unittest.TestCase):
@@ -147,9 +147,9 @@ class TestBox(unittest.TestCase):
         g = r.Rectangle(2, 2, 16, 16)
         h = r.Rectangle(15, 15, 16, 16)
 
-        self.assertEqual(a, b.merge_rects([a, c, d, e, f]))
+        self.assertEqual(a, r.merge_rects([a, c, d, e, f]))
 
-        self.assertEqual(g, b.merge_rects([a, h]))
+        self.assertEqual(g, r.merge_rects([a, h]))
 
 
 if __name__ == "__main__":

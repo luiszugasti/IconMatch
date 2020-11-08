@@ -28,8 +28,6 @@ Part of the Hands Free Computing project. This subproject aims to allow a user t
 
 - [OpenCV](https://opencv.org)
 
-<!-- GETTING STARTED -->
-
 ## Getting Started
 
 Steps on how to set up the project are coming soon...
@@ -84,4 +82,4 @@ Project Link: [https://github.com/luiszugasti/IconMatch](https://github.com/luis
 [license-url]: https://github.com/luiszugasti/IconMatch/blob/main/LICENSE.txt
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=flat-square&logo=linkedin&colorB=555
 [linkedin-url]: https://linkedin.com/in/luiszugasti
-[product-screenshot]: images/screenshot.png
+[product-screenshot]: https://i.imgur.com/Q4Rm7M6.png
