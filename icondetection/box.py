@@ -1,12 +1,19 @@
-import cv2 as cv
-import numpy as np
 import argparse
-import random as rng
 import heapq
-from icondetection.weighted_quick_unionUF import WeightedQuickUnionUF as uf
-from icondetection.rectangle import Rectangle
+import random as rng
 
-rng.seed(12345)
+import cv2 as cv
+
+from icondetection.rectangle import Rectangle
+from icondetection.weighted_quick_unionUF import WeightedQuickUnionUF as uf
+
+
+def grayscale_blur(image):
+    # Convert image to gray and blur it
+    image_gray = cv.cvtColor(image, cv.COLOR_BGR2GRAY)
+    image_gray = cv.blur(image_gray, (3, 3))
+
+    return image_gray
 
 
 def rect_list_to_dict(rects):
@@ -32,7 +39,7 @@ def rect_list_to_dict(rects):
         # step to modify list
         rect_list[rect_index] = temp_rect
 
-    return (rect_dict, rect_list)
+    return rect_dict, rect_list
 
 
 def group_rects(cv_rects, min_x, max_x):
@@ -83,52 +90,18 @@ def group_rects(cv_rects, min_x, max_x):
     return grouped_rects
 
 
-def threshold_callback(val):
-    """
-    Function modified from this tutorial:
-    https://docs.opencv.org/3.4/da/d0c/tutorial_bounding_rects_circles.html
-    Takes a value of threshold for the canny edge detector and finds the
-    bounding rectangles of appropriate edges within an image.
-    """
-    multiplier = 2
-    contour_accuracy = 3
-    min_threshold = val
-    max_threshold = int(min_threshold * multiplier)
-    src = cv.imread(args.input)
-    src2 = src.copy()
+def _render_rectangles(grouped_rects, bounding_rectangles, input_image):
+    render_bounding_rectangles_simple = input_image.copy()
+    render_bounding_rectangles_grouped = input_image.copy()
 
-    canny_output = cv.Canny(src_gray, min_threshold, max_threshold)
-
-    _, contours, _ = cv.findContours(canny_output, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
-
-    contours_poly = [None] * len(contours)
-    boundRect = [None] * len(contours)
-    centers = [None] * len(contours)
-    radius = [None] * len(contours)
-
-    for index, contour in enumerate(contours):
-        contours_poly[index] = cv.approxPolyDP(contour, contour_accuracy, True)
-        boundRect[index] = cv.boundingRect(contours_poly[index])
-        centers[index], radius[index] = cv.minEnclosingCircle(contours_poly[index])
-
-    drawing_all_rects = np.zeros(
-        (canny_output.shape[0], canny_output.shape[1], 3), dtype=np.uint8
-    )
-
-    drawing_grouped_rects = np.zeros(
-        (canny_output.shape[0], canny_output.shape[1], 3), dtype=np.uint8
-    )
-
-    grouped_rects = group_rects(boundRect, 0, src.shape[1])
-
-    for index in range(len(boundRect)):
+    for index in range(len(bounding_rectangles)):
         color = (rng.randint(0, 256), rng.randint(0, 256), rng.randint(0, 256))
         cv.rectangle(
-            src,
-            (int(boundRect[index][0]), int(boundRect[index][1])),
+            render_bounding_rectangles_simple,
+            (int(bounding_rectangles[index][0]), int(bounding_rectangles[index][1])),
             (
-                int(boundRect[index][0] + boundRect[index][2]),
-                int(boundRect[index][1] + boundRect[index][3]),
+                int(bounding_rectangles[index][0] + bounding_rectangles[index][2]),
+                int(bounding_rectangles[index][1] + bounding_rectangles[index][3]),
             ),
             color,
             2,
@@ -139,7 +112,7 @@ def threshold_callback(val):
     for index in range(len(grouped_rects)):
         color = (rng.randint(0, 256), rng.randint(0, 256), rng.randint(0, 256))
         cv.rectangle(
-            src2,
+            render_bounding_rectangles_grouped,
             (int(grouped_rects[index][0]), int(grouped_rects[index][1])),
             (
                 int(grouped_rects[index][0] + grouped_rects[index][2]),
@@ -149,13 +122,64 @@ def threshold_callback(val):
             2,
         )
 
-    cv.imshow("Contours", src)
-    cv.imshow("Groupings", src2)
+    cv.imshow("Ungrouped Rectangles", render_bounding_rectangles_simple)
+    cv.imshow("Grouped Rectangles", render_bounding_rectangles_grouped)
+
+
+def canny_detection(gray_scale_image=None, **kwargs):
+    """
+    Runs openCV Canny detection on a provided gray scale image.
+    Returns the polygons of canny contours and bounding rectangles
+    https://docs.opencv.org/3.4/da/d0c/tutorial_bounding_rects_circles.html
+    """
+
+    multiplier = kwargs['multiplier'] if 'multiplier' in kwargs else 2
+    contour_accuracy = kwargs['contour_accuracy'] if 'multiplier' in kwargs else 3
+    min_threshold = kwargs['min_threshold'] if 'min_threshold' in kwargs else 100
+    max_threshold = int(min_threshold * multiplier)
+
+    if __name__ == "main":
+        canny_output = cv.Canny(src_gray, min_threshold, max_threshold)
+    else:
+        canny_output = cv.Canny(gray_scale_image, min_threshold, max_threshold)
+
+    _, contours, _ = cv.findContours(canny_output, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
+
+    contours_poly = [None] * len(contours)
+    bound_rect = [None] * len(contours)
+
+    for index, contour in enumerate(contours):
+        contours_poly[index] = cv.approxPolyDP(contour, contour_accuracy, True)
+        bound_rect[index] = cv.boundingRect(contours_poly[index])
+
+    return contours_poly, bound_rect
+
+
+def threshold_callback(val):
+    """
+    Function modified from this tutorial:
+
+    Takes a value of threshold for the canny edge detector and finds the
+    bounding rectangles of appropriate edges within an image.
+    """
+
+    # accept an input image and convert it to grayscale, and blur it
+    gray_scale_image = grayscale_blur(src)
+
+    # determine the bounding rectangles from canny detection
+    _, bound_rect = canny_detection(gray_scale_image, min_threshold=val)
+
+    # group the rectangles from this step
+    grouped_rects = group_rects(bound_rect, 0, src.shape[1])
+
+    # (for display purposes) use the provided rectangles to display in your program
+    _render_rectangles(grouped_rects, bound_rect, src)
 
 
 if __name__ == "__main__":
+    rng.seed(12345)
     parser = argparse.ArgumentParser(
-        description="Code for Creating Bounding boxes using Canny Edge Detector."
+        description="Sample showcase of IconDetection."
     )
 
     parser.add_argument("--input", help="Path to input image.")
@@ -166,9 +190,7 @@ if __name__ == "__main__":
         print("Could not open or find the image:", args.input)
         exit(0)
 
-    # Convert image to gray and blur it
-    src_gray = cv.cvtColor(src, cv.COLOR_BGR2GRAY)
-    src_gray = cv.blur(src_gray, (3, 3))
+    src_gray = grayscale_blur(src)
 
     source_window = "Source"
     cv.namedWindow(source_window)
