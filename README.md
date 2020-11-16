@@ -22,27 +22,51 @@ Part of the Hands Free Computing project. This subproject aims to allow a user t
 
 ## About The Project
 
-[![Product Name Screen Shot][product-screenshot]](https://luiszugasti.me)
+[![Showcasing bounding boxes and original image][product-screenshot]](https://luiszugasti.me)
 
 ### Built With
 
-- [OpenCV](https://opencv.org)
+- [OpenCV 3.12](https://opencv.org)
+- [Python 3.8](https://python.org)
 
-## Getting Started
-
-Steps on how to set up the project are coming soon...
+## Getting Started 
 
 ### Prerequisites
 
-Coming soon...
+Refer to the [requirements.txt](https://github.com/luiszugasti/IconMatch/blob/main/requirements.txt) file.
 
 ### Installation
 
-Coming soon...
+Clone this repository to your computer.  
+Install the project using Python 3.8; then install the requirements in the requirements.txt file.  
+A sample demo of how the engine works so far can be found within the icondetection module.
 
 ## Usage
 
-Coming soon...
+You can use (box.py)[https://github.com/luiszugasti/IconMatch/blob/main/icondetection/box.py] as a default entry point.
+
+In the below example, the main set of functions is called within a callback function, as this allows the threshold value
+to be controlled from a GUI in OpenCV.
+
+    def threshold_callback(val):
+    """
+    Function modified from this tutorial:
+    Takes a value of threshold for the canny edge detector and finds the
+    bounding rectangles of appropriate edges within an image.
+    """
+
+    # accept an input image and convert it to grayscale, and blur it
+    gray_scale_image = grayscale_blur(src)
+
+    # determine the bounding rectangles from canny detection
+    _, bound_rect = canny_detection(gray_scale_image, min_threshold=val)
+
+    # group the rectangles from this step
+    grouped_rects = group_rects(bound_rect, 0, src.shape[1])
+
+    # (for display purposes) use the provided rectangles to display in your program
+    _render_rectangles(grouped_rects, bound_rect, src)
+
 
 ## Roadmap
 

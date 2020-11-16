@@ -157,8 +157,6 @@ def canny_detection(gray_scale_image=None, **kwargs):
 
 def threshold_callback(val):
     """
-    Function modified from this tutorial:
-
     Takes a value of threshold for the canny edge detector and finds the
     bounding rectangles of appropriate edges within an image.
     """
