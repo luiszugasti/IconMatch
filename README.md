@@ -43,7 +43,7 @@ A sample demo of how the engine works so far can be found within the icondetecti
 
 ## Usage
 
-You can use (box.py)[https://github.com/luiszugasti/IconMatch/blob/main/icondetection/box.py] as a default entry point.
+You can use [box.py](https://github.com/luiszugasti/IconMatch/blob/main/icondetection/box.py) as a default entry point.
 
 In the below example, the main set of functions is called within a callback function, as this allows the threshold value
 to be controlled from a GUI in OpenCV.
