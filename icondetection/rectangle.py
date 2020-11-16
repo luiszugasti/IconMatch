@@ -88,3 +88,4 @@ class Rectangle:
         if not hasattr(self, "area"):
             self.area = (self.right - self.left) * (self.bottom - self.top)
         return self.area
+
