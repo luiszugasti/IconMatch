@@ -3,13 +3,101 @@ import heapq
 import random as rng
 
 import cv2 as cv
+from typing import List
 
 from icondetection.rectangle import Rectangle
 from icondetection.weighted_quick_unionUF import WeightedQuickUnionUF as uf
 
 
+def _render_rectangles(grouped_rects, bounding_rectangles, input_image):
+    render_bounding_rectangles_simple = input_image.copy()
+    render_bounding_rectangles_grouped = input_image.copy()
+
+    for index in range(len(bounding_rectangles)):
+        color = (rng.randint(0, 256), rng.randint(0, 256), rng.randint(0, 256))
+        cv.rectangle(
+            render_bounding_rectangles_simple,
+            (int(bounding_rectangles[index][0]), int(bounding_rectangles[index][1])),
+            (
+                int(bounding_rectangles[index][0] + bounding_rectangles[index][2]),
+                int(bounding_rectangles[index][1] + bounding_rectangles[index][3]),
+            ),
+            color,
+            2,
+        )
+
+    # TODO: may not need to have specialized conversion from different rect
+    #       types
+    for index in range(len(grouped_rects)):
+        color = (rng.randint(0, 256), rng.randint(0, 256), rng.randint(0, 256))
+        cv.rectangle(
+            render_bounding_rectangles_grouped,
+            (int(grouped_rects[index][0]), int(grouped_rects[index][1])),
+            (
+                int(grouped_rects[index][0] + grouped_rects[index][2]),
+                int(grouped_rects[index][1] + grouped_rects[index][3]),
+            ),
+            color,
+            2,
+        )
+
+    cv.imshow("Ungrouped Rectangles", render_bounding_rectangles_simple)
+    cv.imshow("Grouped Rectangles", render_bounding_rectangles_grouped)
+
+
+def containing_rectangle(rects: List[Rectangle], query_point: tuple) -> Rectangle or None:
+    """
+    Determines the rectangle that covers this query point. Returns None if there is no overlap.
+    TODO: Currently non-deterministic due to iterating through an unordered list.
+    """
+
+    # brute force implementation for now
+    for rect in rects:
+        if rect.contains_point(query_point):
+            return rect
+
+    return None
+
+
+def closest_rectangle(rects: List[Rectangle], query_point: tuple) -> Rectangle:
+    """
+    Determines the closest rectangle to this query point.
+    TODO: Currently non-deterministic due to iterating through an unordered list.
+    """
+
+    closest_distance = rects[0].distance_to_point(query_point)
+    closest_rect = rects[0]
+
+    for rect in rects[1:]:
+        temp_dist = rect.distance_to_point(query_point)
+        if temp_dist < closest_distance:
+            closest_rect = rect
+
+    return closest_rect
+
+
+def candidate_rectangle(rects: List[Rectangle], query_point: tuple) -> Rectangle:
+    """
+    Given a query point in two dimensional space and a list of rectangles,
+    return the closest rectangle.
+    todo: Correctness is not yet guaranteed.
+    """
+
+    # first verify if the query_point is within a rectangle. If it is, return this rectangle.
+    potential_rect = containing_rectangle(rects, query_point)
+    if potential_rect is not None:
+        return potential_rect
+
+    # we now check what is the closest individual point to the query_point.
+    potential_rect = closest_rectangle(rects, query_point)
+
+    return potential_rect
+
+
 def grayscale_blur(image):
-    # Convert image to gray and blur it
+    """
+    Convert image to gray and blur it
+    """
     image_gray = cv.cvtColor(image, cv.COLOR_BGR2GRAY)
     image_gray = cv.blur(image_gray, (3, 3))
 
@@ -88,42 +176,6 @@ def group_rects(cv_rects, min_x, max_x):
         )
 
     return grouped_rects
-
-
-def _render_rectangles(grouped_rects, bounding_rectangles, input_image):
-    render_bounding_rectangles_simple = input_image.copy()
-    render_bounding_rectangles_grouped = input_image.copy()
-
-    for index in range(len(bounding_rectangles)):
-        color = (rng.randint(0, 256), rng.randint(0, 256), rng.randint(0, 256))
-        cv.rectangle(
-            render_bounding_rectangles_simple,
-            (int(bounding_rectangles[index][0]), int(bounding_rectangles[index][1])),
-            (
-                int(bounding_rectangles[index][0] + bounding_rectangles[index][2]),
-                int(bounding_rectangles[index][1] + bounding_rectangles[index][3]),
-            ),
-            color,
-            2,
-        )
-
-    # TODO: may not need to have specialized conversion from different rect
-    #       types
-    for index in range(len(grouped_rects)):
-        color = (rng.randint(0, 256), rng.randint(0, 256), rng.randint(0, 256))
-        cv.rectangle(
-            render_bounding_rectangles_grouped,
-            (int(grouped_rects[index][0]), int(grouped_rects[index][1])),
-            (
-                int(grouped_rects[index][0] + grouped_rects[index][2]),
-                int(grouped_rects[index][1] + grouped_rects[index][3]),
-            ),
-            color,
-            2,
-        )
-
-    cv.imshow("Ungrouped Rectangles", render_bounding_rectangles_simple)
-    cv.imshow("Grouped Rectangles", render_bounding_rectangles_grouped)
 
 
 def canny_detection(gray_scale_image=None, **kwargs):
