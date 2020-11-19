@@ -19,41 +19,30 @@ def _handle_mouse(event, x: int, y: int, flags, params):
         print("x coordinate:{}, y coordinate: {}".format(x, y))
 
 
-def _render_rectangles(grouped_rects, bounding_rectangles, input_image):
-    render_bounding_rectangles_simple = input_image.copy()
-    render_bounding_rectangles_grouped = input_image.copy()
+def _null_handler(event, x, y, flags, params):
+    pass
 
-    for index in range(len(bounding_rectangles)):
-        color = (rng.randint(0, 256), rng.randint(0, 256), rng.randint(0, 256))
-        cv.rectangle(
-            render_bounding_rectangles_simple,
-            (int(bounding_rectangles[index][0]), int(bounding_rectangles[index][1])),
-            (
-                int(bounding_rectangles[index][0] + bounding_rectangles[index][2]),
-                int(bounding_rectangles[index][1] + bounding_rectangles[index][3]),
-            ),
-            color,
-            2,
-        )
+
+def _render_rectangles(rectangles, input_image, display_text, callback):
+    render_rectangles = input_image.copy()
 
     # TODO: may not need to have specialized conversion from different rect
     #       types
-    for index in range(len(grouped_rects)):
+    for index in range(len(rectangles)):
         color = (rng.randint(0, 256), rng.randint(0, 256), rng.randint(0, 256))
         cv.rectangle(
-            render_bounding_rectangles_grouped,
-            (int(grouped_rects[index][0]), int(grouped_rects[index][1])),
+            render_rectangles,
+            (int(rectangles[index][0]), int(rectangles[index][1])),
             (
-                int(grouped_rects[index][0] + grouped_rects[index][2]),
-                int(grouped_rects[index][1] + grouped_rects[index][3]),
+                int(rectangles[index][0] + rectangles[index][2]),
+                int(rectangles[index][1] + rectangles[index][3]),
             ),
             color,
             2,
         )
 
-    cv.imshow("Ungrouped Rectangles", render_bounding_rectangles_simple)
-    cv.imshow("Grouped Rectangles", render_bounding_rectangles_grouped)
-    cv.setMouseCallback("Grouped Rectangles", _handle_mouse)
+    cv.imshow(display_text, render_rectangles)
+    cv.setMouseCallback("Grouped Rectangles", callback)
 
 
 def containing_rectangle(rects: List[Rectangle], query_point: tuple) -> Rectangle or None:
@@ -235,7 +224,9 @@ def threshold_callback(val):
     grouped_rects = group_rects(bound_rect, 0, src.shape[1])
 
     # (for display purposes) use the provided rectangles to display in your program
-    _render_rectangles(grouped_rects, bound_rect, src)
+    _render_rectangles(grouped_rects, src, "Grouped Rectangles", _null_handler)
+    _render_rectangles(bound_rect, src, "Original Rectangles", _null_handler)
+    _render_rectangles(grouped_rects, src, "Closest Rectangle", _handle_mouse)
 
 
 if __name__ == "__main__":

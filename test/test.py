@@ -296,5 +296,9 @@ class TestBox(unittest.TestCase):
         self.assertEqual(self.l_green, box.closest_rectangle(self.google_rectangles_small, point_above_l_green))
         self.assertEqual(self.e_red, box.closest_rectangle(self.google_rectangles_small, point_under_e_red))
 
+    def test_candidate_rectangle(self):
+        # integration test?
+        pass
+
     if __name__ == "__main__":
         unittest.main()
