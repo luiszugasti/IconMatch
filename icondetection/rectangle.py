@@ -6,10 +6,15 @@ class Rectangle:
         """
         Create a rectangle in "std" notation
         """
+
+        # initialize them now
         self.top = top
         self.left = left
         self.bottom = bottom
         self.right = right
+
+        # stored for cached initialization
+        self.area = None
 
     @staticmethod
     def intersect(rectA, rectB) -> bool:
@@ -94,13 +99,13 @@ class Rectangle:
         return False
 
     def get_area(self):
-        if not hasattr(self, "area"):
+        if self.area is None:
             self.area = (self.right - self.left) * (self.bottom - self.top)
         return self.area
 
     def contains_point(self, point) -> bool:
         # for now: x is point[0], y is point[1]
-        if self.right > point[0] > self.left and self.bottom > point[1] > self.top:
+        if self.right >= point[0] >= self.left and self.bottom >= point[1] >= self.top:
             return True
         return False
 
@@ -111,9 +116,9 @@ class Rectangle:
             # for now: x is point[0], y is point[1]
             return (point1[0] - point2[0]) ** 2 + (point1[1] - point2[1]) ** 2
 
-        dist_top_left = euclidean_distance(point, (self.top, self.left))
-        dist_top_right = euclidean_distance(point, (self.top, self.right))
-        dist_bottom_left = euclidean_distance(point, (self.bottom, self.left))
-        dist_bottom_right = euclidean_distance(point, (self.bottom, self.right))
+        dist_top_left = euclidean_distance(point, (self.left, self.top))
+        dist_top_right = euclidean_distance(point, (self.right, self.top))
+        dist_bottom_left = euclidean_distance(point, (self.left, self.bottom))
+        dist_bottom_right = euclidean_distance(point, (self.right, self.bottom))
 
-        return max(dist_top_left, dist_top_right, dist_bottom_left, dist_bottom_right)
+        return min(dist_top_left, dist_top_right, dist_bottom_left, dist_bottom_right)

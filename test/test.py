@@ -78,10 +78,13 @@ class TestUF(unittest.TestCase):
         self.assertCountEqual([0], unions_t.keys())
 
 
-class TestBox(unittest.TestCase):
+class TestRectangle(unittest.TestCase):
     """
-    Test the functionality in Box Sandbox
+    Test Rectangle Methods
     """
+
+    def setUp(self):
+        self.global_rect = r.Rectangle(3, 3, 9, 9)
 
     def test_same_intersect(self):
         """
@@ -150,6 +153,66 @@ class TestBox(unittest.TestCase):
         self.assertEqual(a, r.Rectangle.merge_rects([a, c, d, e, f]))
 
         self.assertEqual(g, r.Rectangle.merge_rects([a, h]))
+
+    def test_contains_point(self):
+        """
+        Test multiple points being in and out of the global rectangle
+        """
+
+        # points that are inside, or on the fringe
+        point1 = (4, 4)
+        point2 = (3, 3)
+        point3 = (3, 9)
+        point4 = (9, 3)
+
+        self.assertTrue(self.global_rect.contains_point(point1))
+        self.assertTrue(self.global_rect.contains_point(point2))
+        self.assertTrue(self.global_rect.contains_point(point3))
+        self.assertTrue(self.global_rect.contains_point(point4))
+
+        # points that are outside
+        point1a = (1, 4)
+        point2a = (10, 3)
+        point3a = (3, 90)
+        point4a = (9, -1)
+
+        self.assertFalse(self.global_rect.contains_point(point1a))
+        self.assertFalse(self.global_rect.contains_point(point2a))
+        self.assertFalse(self.global_rect.contains_point(point3a))
+        self.assertFalse(self.global_rect.contains_point(point4a))
+
+    def test_distance_to_point(self):
+        """
+        Test multiple distances for rectangle
+        """
+
+        # points that are inside, or on the fringe
+        point1 = (4, 4)
+        point2 = (3, 3)
+        point3 = (3, 9)
+        point4 = (9, 3)
+
+        self.assertEqual(2, self.global_rect.distance_to_point(point1))
+        self.assertEqual(0, self.global_rect.distance_to_point(point2))
+        self.assertEqual(0, self.global_rect.distance_to_point(point3))
+        self.assertEqual(0, self.global_rect.distance_to_point(point4))
+
+        # points that are outside
+        point1a = (1, 4)
+        point2a = (10, 3)
+        point3a = (3, 90)
+        point4a = (9, -1)
+
+        self.assertEqual(5, self.global_rect.distance_to_point(point1a))
+        self.assertEqual(1, self.global_rect.distance_to_point(point2a))
+        self.assertEqual(6561, self.global_rect.distance_to_point(point3a))
+        self.assertEqual(16, self.global_rect.distance_to_point(point4a))
+
+
+class TestBox(unittest.TestCase):
+    """
+    Test functionality in Box
+    """
 
 
 if __name__ == "__main__":
