@@ -1,48 +1,10 @@
-import argparse
 import heapq
-import random as rng
 
 import cv2 as cv
 from typing import List
 
 from icondetection.rectangle import Rectangle
 from icondetection.weighted_quick_unionUF import WeightedQuickUnionUF as uf
-
-
-def _handle_mouse(event, x: int, y: int, flags, params):
-    """
-    code partly inspired by that found here:
-    https://divyanshushekhar.com/mouse-events-opencv/
-    Left click to print the x, y coordinates.
-    """
-    if event == cv.EVENT_LBUTTONDOWN:
-        print("x coordinate:{}, y coordinate: {}".format(x, y))
-
-
-def _null_handler(event, x, y, flags, params):
-    pass
-
-
-def _render_rectangles(rectangles, input_image, display_text, callback):
-    render_rectangles = input_image.copy()
-
-    # TODO: may not need to have specialized conversion from different rect
-    #       types
-    for index in range(len(rectangles)):
-        color = (rng.randint(0, 256), rng.randint(0, 256), rng.randint(0, 256))
-        cv.rectangle(
-            render_rectangles,
-            (int(rectangles[index][0]), int(rectangles[index][1])),
-            (
-                int(rectangles[index][0] + rectangles[index][2]),
-                int(rectangles[index][1] + rectangles[index][3]),
-            ),
-            color,
-            2,
-        )
-
-    cv.imshow(display_text, render_rectangles)
-    cv.setMouseCallback("Grouped Rectangles", callback)
 
 
 def containing_rectangle(rects: List[Rectangle], query_point: tuple) -> Rectangle or None:
@@ -191,10 +153,7 @@ def canny_detection(gray_scale_image=None, **kwargs):
     min_threshold = kwargs['min_threshold'] if 'min_threshold' in kwargs else 100
     max_threshold = int(min_threshold * multiplier)
 
-    if __name__ == "main":
-        canny_output = cv.Canny(src_gray, min_threshold, max_threshold)
-    else:
-        canny_output = cv.Canny(gray_scale_image, min_threshold, max_threshold)
+    canny_output = cv.Canny(gray_scale_image, min_threshold, max_threshold)
 
     _, contours, _ = cv.findContours(canny_output, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
 
@@ -206,54 +165,3 @@ def canny_detection(gray_scale_image=None, **kwargs):
         bound_rect[index] = cv.boundingRect(contours_poly[index])
 
     return contours_poly, bound_rect
-
-
-def threshold_callback(val):
-    """
-    Takes a value of threshold for the canny edge detector and finds the
-    bounding rectangles of appropriate edges within an image.
-    """
-
-    # accept an input image and convert it to grayscale, and blur it
-    gray_scale_image = grayscale_blur(src)
-
-    # determine the bounding rectangles from canny detection
-    _, bound_rect = canny_detection(gray_scale_image, min_threshold=val)
-
-    # group the rectangles from this step
-    grouped_rects = group_rects(bound_rect, 0, src.shape[1])
-
-    # (for display purposes) use the provided rectangles to display in your program
-    _render_rectangles(grouped_rects, src, "Grouped Rectangles", _null_handler)
-    _render_rectangles(bound_rect, src, "Original Rectangles", _null_handler)
-    _render_rectangles(grouped_rects, src, "Closest Rectangle", _handle_mouse)
-
-
-if __name__ == "__main__":
-    rng.seed(12345)
-    parser = argparse.ArgumentParser(
-        description="Sample showcase of IconDetection."
-    )
-
-    parser.add_argument("--input", help="Path to input image.")
-
-    args = parser.parse_args()
-    src = cv.imread(args.input)
-    if src is None:
-        print("Could not open or find the image:", args.input)
-        exit(0)
-
-    src_gray = grayscale_blur(src)
-
-    source_window = "Source"
-    cv.namedWindow(source_window)
-    cv.imshow(source_window, src)
-
-    max_thresh = 255
-    thresh = 100  # initial threshold
-
-    cv.createTrackbar(
-        "Canny threshold:", source_window, thresh, max_thresh, threshold_callback
-    )
-    threshold_callback(thresh)
-    cv.waitKey()
