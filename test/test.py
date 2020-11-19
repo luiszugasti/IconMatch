@@ -1,6 +1,7 @@
 import unittest
 
 import icondetection.rectangle as r
+from icondetection import box
 from icondetection.weighted_quick_unionUF import WeightedQuickUnionUF as uf
 
 
@@ -214,6 +215,86 @@ class TestBox(unittest.TestCase):
     Test functionality in Box
     """
 
+    def setUp(self):
+        # one of these days I'm going to change the openCV interface to make more sense...
+        self.google_rectangles = [r.Rectangle(193, 279, 236, 297),
+                                  r.Rectangle(255, 279, 275, 294),
+                                  r.Rectangle(241, 282, 250, 294),
+                                  r.Rectangle(343, 279, 353, 294),
+                                  r.Rectangle(353, 279, 410, 298),
+                                  r.Rectangle(316, 279, 333, 294),
+                                  r.Rectangle(275, 280, 310, 294),
+                                  r.Rectangle(272, 279, 274, 293),
+                                  r.Rectangle(237, 279, 240, 294),
+                                  r.Rectangle(391, 225, 428, 240),
+                                  r.Rectangle(319, 226, 338, 237),
+                                  r.Rectangle(341, 225, 387, 240),
+                                  r.Rectangle(228, 226, 273, 237),
+                                  r.Rectangle(178, 225, 224, 240),
+                                  r.Rectangle(559, 151, 573, 171),
+                                  r.Rectangle(29, 152, 43, 167),
+                                  r.Rectangle(396, 44, 437, 89),
+                                  r.Rectangle(334, 44, 376, 108),
+                                  r.Rectangle(286, 44, 331, 89),
+                                  r.Rectangle(238, 44, 283, 89),
+                                  r.Rectangle(382, 21, 392, 87),
+                                  r.Rectangle(382, 21, 392, 87),
+                                  r.Rectangle(167, 19, 235, 89),
+                                  r.Rectangle(167, 19, 235, 89),
+                                  ]
 
-if __name__ == "__main__":
-    unittest.main()
+        self.G_blue = r.Rectangle(14, 6, 84, 74)
+        self.o_red = r.Rectangle(39, 77, 84, 122)
+        self.o_yellow = r.Rectangle(39, 125, 84, 170)
+        self.g_blue = r.Rectangle(39, 173, 103, 215)
+        self.l_green = r.Rectangle(16, 221, 82, 231)
+        self.e_red = r.Rectangle(39, 235, 84, 276)
+        self.google_rectangles_small = [self.G_blue,
+                                        self.o_red,
+                                        self.o_yellow,
+                                        self.g_blue,
+                                        self.l_green,
+                                        self.e_red,
+                                        ]
+
+    def test_in_rectangle_out_rectangle(self):
+        point_in_G_blue = (40, 45)
+        point_in_o_red = (100, 63)
+        point_in_o_yellow = (151, 63)
+        point_in_g_blue = (196, 72)
+        point_in_l_green = (226, 51)
+        point_in_e_red = (259, 66)
+
+        # inside the rectangle
+        self.assertTrue(self.G_blue.contains_point(point_in_G_blue))
+        self.assertTrue(self.o_red.contains_point(point_in_o_red))
+        self.assertTrue(self.o_yellow.contains_point(point_in_o_yellow))
+        self.assertTrue(self.g_blue.contains_point(point_in_g_blue))
+        self.assertTrue(self.l_green.contains_point(point_in_l_green))
+        self.assertTrue(self.e_red.contains_point(point_in_e_red))
+
+        # outside the rectangle
+        self.assertFalse(self.G_blue.contains_point(point_in_o_red))
+        self.assertFalse(self.o_red.contains_point(point_in_o_yellow))
+        self.assertFalse(self.o_yellow.contains_point(point_in_o_red))
+        self.assertFalse(self.g_blue.contains_point(point_in_o_red))
+        self.assertFalse(self.l_green.contains_point(point_in_o_red))
+        self.assertFalse(self.e_red.contains_point(point_in_o_red))
+
+    def test_closest_rectangle_no_ties(self):
+        point_under_G_blue = (7, 95)
+        point_under_o_red = (100, 92)
+        point_under_o_yellow = (148, 89)
+        point_under_g_blue = (193, 110)
+        point_above_l_green = (226, 11)
+        point_under_e_red = (259, 89)
+
+        self.assertEqual(self.G_blue, box.closest_rectangle(self.google_rectangles_small, point_under_G_blue))
+        self.assertEqual(self.o_red, box.closest_rectangle(self.google_rectangles_small, point_under_o_red))
+        self.assertEqual(self.o_yellow, box.closest_rectangle(self.google_rectangles_small, point_under_o_yellow))
+        self.assertEqual(self.g_blue, box.closest_rectangle(self.google_rectangles_small, point_under_g_blue))
+        self.assertEqual(self.l_green, box.closest_rectangle(self.google_rectangles_small, point_above_l_green))
+        self.assertEqual(self.e_red, box.closest_rectangle(self.google_rectangles_small, point_under_e_red))
+
+    if __name__ == "__main__":
+        unittest.main()

@@ -9,6 +9,16 @@ from icondetection.rectangle import Rectangle
 from icondetection.weighted_quick_unionUF import WeightedQuickUnionUF as uf
 
 
+def _handle_mouse(event, x: int, y: int, flags, params):
+    """
+    code partly inspired by that found here:
+    https://divyanshushekhar.com/mouse-events-opencv/
+    Left click to print the x, y coordinates.
+    """
+    if event == cv.EVENT_LBUTTONDOWN:
+        print("x coordinate:{}, y coordinate: {}".format(x, y))
+
+
 def _render_rectangles(grouped_rects, bounding_rectangles, input_image):
     render_bounding_rectangles_simple = input_image.copy()
     render_bounding_rectangles_grouped = input_image.copy()
@@ -43,6 +53,7 @@ def _render_rectangles(grouped_rects, bounding_rectangles, input_image):
 
     cv.imshow("Ungrouped Rectangles", render_bounding_rectangles_simple)
     cv.imshow("Grouped Rectangles", render_bounding_rectangles_grouped)
+    cv.setMouseCallback("Grouped Rectangles", _handle_mouse)
 
 
 def containing_rectangle(rects: List[Rectangle], query_point: tuple) -> Rectangle or None:
@@ -71,6 +82,7 @@ def closest_rectangle(rects: List[Rectangle], query_point: tuple) -> Rectangle:
     for rect in rects[1:]:
         temp_dist = rect.distance_to_point(query_point)
         if temp_dist < closest_distance:
+            closest_distance = temp_dist
             closest_rect = rect
 
     return closest_rect

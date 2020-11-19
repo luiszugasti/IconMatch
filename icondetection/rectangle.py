@@ -122,3 +122,6 @@ class Rectangle:
         dist_bottom_right = euclidean_distance(point, (self.right, self.bottom))
 
         return min(dist_top_left, dist_top_right, dist_bottom_left, dist_bottom_right)
+
+    def __str__(self):
+        return "{0}, {1}, {2}, {3}".format(self.top, self.left, self.bottom, self.right)
