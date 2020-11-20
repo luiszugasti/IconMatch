@@ -9,7 +9,7 @@ from icondetection.weighted_quick_unionUF import WeightedQuickUnionUF as uf
 
 def containing_rectangle(rects: List[Rectangle], query_point: tuple) -> Rectangle or None:
     """
-    Determines the rectangle that covers this query point. Returns None if there is no overlap.
+    Determine the rectangle that covers this query point. Return None if there is no overlap.
     TODO: Currently non-deterministic due to iterating through an unordered list.
     """
 
@@ -23,7 +23,7 @@ def containing_rectangle(rects: List[Rectangle], query_point: tuple) -> Rectangl
 
 def closest_rectangle(rects: List[Rectangle], query_point: tuple) -> Rectangle:
     """
-    Determines the closest rectangle to this query point.
+    Determine the closest rectangle to this query point.
     TODO: Currently non-deterministic due to iterating through an unordered list.
     """
 
@@ -41,8 +41,7 @@ def closest_rectangle(rects: List[Rectangle], query_point: tuple) -> Rectangle:
 
 def candidate_rectangle(rects: List[Rectangle], query_point: tuple) -> Rectangle:
     """
-    Given a query point in two dimensional space and a list of rectangles,
-    return the closest rectangle.
+    Return the closest rectangle, when given a query point in two dimensional space and a list of rectangles.
     todo: Correctness is not yet guaranteed.
     """
 
@@ -59,7 +58,7 @@ def candidate_rectangle(rects: List[Rectangle], query_point: tuple) -> Rectangle
 
 def grayscale_blur(image):
     """
-    Convert image to gray and blur it
+    Convert image to gray and blur it.
     """
     image_gray = cv.cvtColor(image, cv.COLOR_BGR2GRAY)
     image_gray = cv.blur(image_gray, (3, 3))
@@ -69,8 +68,7 @@ def grayscale_blur(image):
 
 def rect_list_to_dict(rects):
     """
-    Takes a list of cv rects and returns their dictionary representation for
-    simple filtering.
+    Take a list of cv rects and returns their dictionary representation for simple filtering.
     """
     # POTENTIALLY PROBLEMATIC: necessarily has to be a list of (index, rects)
     rect_dict = {}
@@ -143,8 +141,8 @@ def group_rects(cv_rects, min_x, max_x):
 
 def canny_detection(gray_scale_image=None, **kwargs):
     """
-    Runs openCV Canny detection on a provided gray scale image.
-    Returns the polygons of canny contours and bounding rectangles
+    Run openCV Canny detection on a provided gray scale image. Return the polygons of canny contours and bounding
+    rectangles.
     https://docs.opencv.org/3.4/da/d0c/tutorial_bounding_rects_circles.html
     """
 

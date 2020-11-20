@@ -3,7 +3,7 @@ import numpy as np
 import cv2
 
 
-def run_SIFT(img):
+def run_sift(img):
     img = cv2.cvtColor(np.array(img), cv2.COLOR_RGB2BGR)
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 

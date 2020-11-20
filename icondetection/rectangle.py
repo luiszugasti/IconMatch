@@ -1,13 +1,34 @@
+import math
 import sys
+
+from typing import List
 
 
 class Rectangle:
-    def __init__(self, top, left, bottom, right):
+    """
+    Representation of a rectangle in two dimensional space.
+
+    Note: Keep in mind that due to OpenCV's representation of the screen, y increases from top to bottom!
+                            0 - x +
+                            |
+                            y
+                            +
+    Where top, bottom, left and right are named relative to cartesian coordinates. The below
+    diagram shows what this entails.
+                           Top
+                        --------
+                        |      |
+                   Left |      | Right
+                        |      |
+                        --------
+                         Bottom
+    """
+
+    def __init__(self, top: int, left: int, bottom: int, right: int):
         """
-        Create a rectangle in "std" notation
+        Create a rectangle in Cartesian notation
         """
 
-        # initialize them now
         self.top = top
         self.left = left
         self.bottom = bottom
@@ -17,25 +38,25 @@ class Rectangle:
         self.area = None
 
     @staticmethod
-    def intersect(rectA, rectB) -> bool:
+    def intersect(rect_a, rect_b) -> bool:
         """
-        Determines if rectA, rectB, intersect.
+        Determine if rect_a, rect_b intersect.
         Modified slightly from:
         https://stackoverflow.com/questions/306316/determine-if-two-rectangles-overlap-each-other#306332
         """
 
         ret = (
-                rectA.left < rectB.right
-                and rectA.right > rectB.left
-                and rectA.top < rectB.bottom
-                and rectA.bottom > rectB.top
+                rect_a.left < rect_b.right
+                and rect_a.right > rect_b.left
+                and rect_a.top < rect_b.bottom
+                and rect_a.bottom > rect_b.top
         )
         return ret
 
     @staticmethod
-    def merge_rects(rects):
+    def merge_rects(rects: List['Rectangle']):
         """
-        Merges a list of rects into one conglomerate rect in "std".
+        Merge a list of rects into one conglomerate rect in Cartesian representation.
         """
 
         ans = Rectangle(sys.maxsize, sys.maxsize, 0, 0)
@@ -53,31 +74,17 @@ class Rectangle:
         return ans
 
     @staticmethod
-    def rect_cv_to_cartesian(rect):
+    def rect_cv_to_cartesian(rect: tuple) -> 'Rectangle':
         """
-        Converts a rectangle from CV representation to cartesian coordinates.
-        Note: Keep in mind that y increases from top to bottom!
-                            0 - x +
-                            |
-                            y
-                            +
-        Where top, bottom, left and right are named relative to cartesian coordinates. Basically, the below
-        diagram shows what they mean.
-                               Top
-                            --------
-                            |      |
-                       Left |      | Right
-                            |      |
-                            --------
-                             Bottom
+        Convert a rectangle from CV representation to cartesian coordinates.
         """
         new_rect = Rectangle(rect[0], rect[1], rect[0] + rect[2], rect[1] + rect[3])
         return new_rect
 
     @staticmethod
-    def rect_cartesian_to_cv(rect):
+    def rect_cartesian_to_cv(rect) -> tuple:
         """
-        Convert rectangle from Std representation back to CV representation
+        Convert rectangle from Cartesian representation back to CV tuple representation
         """
         new_rect = (rect.top, rect.left, rect.bottom - rect.top, rect.right - rect.left)
         return new_rect
@@ -99,29 +106,35 @@ class Rectangle:
         return False
 
     def get_area(self):
+        """
+        Return the area taken up by this rectangle.
+        """
         if self.area is None:
             self.area = (self.right - self.left) * (self.bottom - self.top)
         return self.area
 
     def contains_point(self, point) -> bool:
-        # for now: x is point[0], y is point[1]
-        if self.right >= point[0] >= self.left and self.bottom >= point[1] >= self.top:
+        """
+        Given a point represented by a tuple (x, y), return whether the point is within this rectangle.
+        """
+        if self.distance_to_point(point) == 0.0:
             return True
         return False
 
-    def distance_to_point(self, point: tuple) -> int:
-        # brute force: determine squared Euclidean distance from each corner to the point and return the lowest value.
+    def distance_to_point(self, point: tuple) -> float:
+        """
+        Determine the distance from a rectangle to a point.
+        https://stackoverflow.com/questions/5254838/calculating-distance-between-a-point-and-a-rectangular-box-nearest-point
+        If the point is within a rectangle, zero will be returned.
+        """
+        dx = max(self.left - point[0], 0, point[0] - self.right)
+        dy = max(self.top - point[1], 0, point[1] - self.bottom)
 
-        def euclidean_distance(point1: tuple, point2: tuple) -> int:
-            # for now: x is point[0], y is point[1]
-            return (point1[0] - point2[0]) ** 2 + (point1[1] - point2[1]) ** 2
+        if dx == 0 and dy == 0:
+            return 0.0
 
-        dist_top_left = euclidean_distance(point, (self.left, self.top))
-        dist_top_right = euclidean_distance(point, (self.right, self.top))
-        dist_bottom_left = euclidean_distance(point, (self.left, self.bottom))
-        dist_bottom_right = euclidean_distance(point, (self.right, self.bottom))
-
-        return min(dist_top_left, dist_top_right, dist_bottom_left, dist_bottom_right)
+        # potentially problematic due to using floats
+        return math.sqrt(dx ** 2 + dy ** 2)
 
     def __str__(self):
-        return "{0}, {1}, {2}, {3}".format(self.top, self.left, self.bottom, self.right)
+        return "({1},{0}), ({3},{2})".format(self.top, self.left, self.bottom, self.right)

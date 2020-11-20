@@ -1,7 +1,7 @@
 from PIL import ImageGrab
 from pynput import mouse
 import icondetection
-from icondetection.helpers import runSIFT, saveImg
+from icondetection.helpers import run_sift, save_img
 
 
 def main():
@@ -34,9 +34,9 @@ def main():
         )
     )
 
-    saveImg(screen_shot, "pre")
-    runSIFT(screen_shot)
-    saveImg(screen_shot, "post")
+    save_img(screen_shot, "pre")
+    run_sift(screen_shot)
+    save_img(screen_shot, "post")
 
 
 if __name__ == "__main__":

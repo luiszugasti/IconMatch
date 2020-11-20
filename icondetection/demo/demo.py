@@ -2,39 +2,66 @@ import argparse
 import random as rng
 import cv2 as cv
 
-from icondetection.box import grayscale_blur, canny_detection, group_rects
+from icondetection.box import grayscale_blur, canny_detection, group_rects, candidate_rectangle
+from icondetection.rectangle import Rectangle
 
 
-def _handle_mouse(event, x: int, y: int, flags, params):
+# todo: correct order of x, y?
+def closest_rectangle_handler(event, x: int, y: int, flags, params):
     """
-    code partly inspired by that found here:
+    Determine the closest rectangle to mouse click.
     https://divyanshushekhar.com/mouse-events-opencv/
-    Left click to print the x, y coordinates.
     """
-    text = ''
-    font = cv.FONT_HERSHEY_COMPLEX
-    color = (255, 0, 0)
+
+    # grr globals
+    global src, src2, candidate_rect, grouped_rects, excluded_rects
 
     if event == cv.EVENT_LBUTTONDOWN:
         print("x coordinate:{}, y coordinate: {}".format(x, y))
-        text = "x coordinate:{}, y coordinate: {}".format(x, y)
+        color = (rng.randint(0, 256), rng.randint(0, 256), rng.randint(0, 256))
 
-    cv.putText(src2, text, (x, y), font, 0.5, color, 1, cv.LINE_AA)
+        src2 = src.copy()
+        candidate_rect = candidate_rectangle([Rectangle.rect_cv_to_cartesian(t) for t in grouped_rects], (y, x))
+        excluded_rects = filter(lambda rect: rect is not candidate_rect, grouped_rects)
+
+        cv.rectangle(
+            src2,
+            (candidate_rect.bottom, candidate_rect.left),
+            (candidate_rect.top, candidate_rect.right),
+            color,
+            2,
+        )
+        cv.imshow("Candidate Rectangles", src2)
 
 
-def _null_handler(event, x, y, flags, params):
+def null_handler(event, x, y, flags, params):
+    """
+    Null handler. Does nothing.
+    """
     pass
 
 
-def _render_rectangles(rectangles, input_image, display_text, callback):
+def candidate_rectangle_demo():
     """
-    Make sure to send a copy of your image with .copy()
+    Show a candidate rectangle for a pressed location
+    """
+
+    cv.imshow("Candidate Rectangles", src2)
+    cv.setMouseCallback("Candidate Rectangles", closest_rectangle_handler)
+
+
+def render_rectangles(rectangles, input_image, display_text, callback=null_handler, desired_color: tuple = None):
+    """
+    Render given rectangles on provided input image.
+    Note: Make sure to send a copy of your image with .copy()
     """
 
     # TODO: may not need to have specialized conversion from different rect
     #       types
     for index in range(len(rectangles)):
-        color = (rng.randint(0, 256), rng.randint(0, 256), rng.randint(0, 256))
+        color = desired_color if desired_color is not None else (
+            rng.randint(0, 256), rng.randint(0, 256), rng.randint(0, 256)
+        )
         cv.rectangle(
             input_image,
             (int(rectangles[index][0]), int(rectangles[index][1])),
@@ -47,38 +74,8 @@ def _render_rectangles(rectangles, input_image, display_text, callback):
         )
 
     cv.imshow(display_text, input_image)
-    cv.setMouseCallback("Grouped Rectangles", callback)
+    cv.setMouseCallback(display_text, callback)
 
-
-# def _render_interactive_window():
-#     def draw_rectangle_with_drag(event, x, y, flags, param):
-#
-#         global ix, iy, drawing, img
-#
-#         if event == cv.EVENT_LBUTTONDOWN:
-#             drawing = True
-#             ix = x
-#             iy = y
-#
-#         elif event == cv.EVENT_MOUSEMOVE:
-#             if drawing == True:
-#                 cv.rectangle(img, pt1=(ix, iy),
-#                              pt2=(x, y),
-#                              color=(0, 255, 255),
-#                              thickness=-1)
-#
-#         elif event == cv.EVENT_LBUTTONUP:
-#             drawing = False
-#             cv.rectangle(img, pt1=(ix, iy),
-#                          pt2=(x, y),
-#                          color=(0, 255, 255),
-#                          thickness=-1)
-#
-#     cv.namedWindow(winname="Title of Popup Window")
-#     cv.setMouseCallback("Title of Popup Window",
-#                         draw_rectangle_with_drag)
-#     while True:
-#         cv.imshow("Title of popup window", src2)
 
 def threshold_callback(val):
     """
@@ -93,12 +90,13 @@ def threshold_callback(val):
     _, bound_rect = canny_detection(gray_scale_image, min_threshold=val)
 
     # group the rectangles from this step
+    global grouped_rects
     grouped_rects = group_rects(bound_rect, 0, src.shape[1])
 
     # (for display purposes) use the provided rectangles to display in your program
-    _render_rectangles(grouped_rects, src.copy(), "Grouped Rectangles", _null_handler)
-    _render_rectangles(bound_rect, src.copy(), "Original Rectangles", _null_handler)
-    # _render_interactive_window()
+    render_rectangles(grouped_rects, src.copy(), "Grouped Rectangles", desired_color=(36, 9, 14))
+    render_rectangles(bound_rect, src.copy(), "Original Rectangles", desired_color=(96, 9, 104))
+    candidate_rectangle_demo()
 
 
 if __name__ == "__main__":

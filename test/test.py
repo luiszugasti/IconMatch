@@ -193,10 +193,10 @@ class TestRectangle(unittest.TestCase):
         point3 = (3, 9)
         point4 = (9, 3)
 
-        self.assertEqual(2, self.global_rect.distance_to_point(point1))
-        self.assertEqual(0, self.global_rect.distance_to_point(point2))
-        self.assertEqual(0, self.global_rect.distance_to_point(point3))
-        self.assertEqual(0, self.global_rect.distance_to_point(point4))
+        self.assertAlmostEqual(0.0, self.global_rect.distance_to_point(point1))
+        self.assertAlmostEqual(0.0, self.global_rect.distance_to_point(point2))
+        self.assertAlmostEqual(0.0, self.global_rect.distance_to_point(point3))
+        self.assertAlmostEqual(0.0, self.global_rect.distance_to_point(point4))
 
         # points that are outside
         point1a = (1, 4)
@@ -204,10 +204,10 @@ class TestRectangle(unittest.TestCase):
         point3a = (3, 90)
         point4a = (9, -1)
 
-        self.assertEqual(5, self.global_rect.distance_to_point(point1a))
-        self.assertEqual(1, self.global_rect.distance_to_point(point2a))
-        self.assertEqual(6561, self.global_rect.distance_to_point(point3a))
-        self.assertEqual(16, self.global_rect.distance_to_point(point4a))
+        self.assertAlmostEqual(2.0, self.global_rect.distance_to_point(point1a))
+        self.assertAlmostEqual(1.0, self.global_rect.distance_to_point(point2a))
+        self.assertAlmostEqual(81.0, self.global_rect.distance_to_point(point3a))
+        self.assertAlmostEqual(4.0, self.global_rect.distance_to_point(point4a))
 
 
 class TestBox(unittest.TestCase):
@@ -258,7 +258,7 @@ class TestBox(unittest.TestCase):
                                         ]
 
     def test_in_rectangle_out_rectangle(self):
-        point_in_G_blue = (40, 45)
+        point_under_capital_g_blue = (40, 45)
         point_in_o_red = (100, 63)
         point_in_o_yellow = (151, 63)
         point_in_g_blue = (196, 72)
@@ -266,7 +266,7 @@ class TestBox(unittest.TestCase):
         point_in_e_red = (259, 66)
 
         # inside the rectangle
-        self.assertTrue(self.G_blue.contains_point(point_in_G_blue))
+        self.assertTrue(self.G_blue.contains_point(point_under_capital_g_blue))
         self.assertTrue(self.o_red.contains_point(point_in_o_red))
         self.assertTrue(self.o_yellow.contains_point(point_in_o_yellow))
         self.assertTrue(self.g_blue.contains_point(point_in_g_blue))
@@ -282,14 +282,14 @@ class TestBox(unittest.TestCase):
         self.assertFalse(self.e_red.contains_point(point_in_o_red))
 
     def test_closest_rectangle_no_ties(self):
-        point_under_G_blue = (7, 95)
+        point_under_capital_g_blue = (7, 95)
         point_under_o_red = (100, 92)
         point_under_o_yellow = (148, 89)
         point_under_g_blue = (193, 110)
         point_above_l_green = (226, 11)
         point_under_e_red = (259, 89)
 
-        self.assertEqual(self.G_blue, box.closest_rectangle(self.google_rectangles_small, point_under_G_blue))
+        self.assertEqual(self.G_blue, box.closest_rectangle(self.google_rectangles_small, point_under_capital_g_blue))
         self.assertEqual(self.o_red, box.closest_rectangle(self.google_rectangles_small, point_under_o_red))
         self.assertEqual(self.o_yellow, box.closest_rectangle(self.google_rectangles_small, point_under_o_yellow))
         self.assertEqual(self.g_blue, box.closest_rectangle(self.google_rectangles_small, point_under_g_blue))
