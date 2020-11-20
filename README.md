@@ -22,7 +22,8 @@ Part of the Hands Free Computing project. This subproject aims to allow a user t
 
 ## About The Project
 
-[![Showcasing bounding boxes and original image][product-screenshot]](https://luiszugasti.me)
+[![Showcasing bounding boxes and original image][product-screenshot1]](https://luiszugasti.me)
+[![Showcasing candidate boxes functionality][product-screenshot2]](https://luiszugasti.me)
 
 ### Built With
 
@@ -41,42 +42,52 @@ Clone this repository to your computer.
 Install the project using Python 3.8; then install the requirements in the requirements.txt file.  
 A sample demo of how the engine works so far can be found within the icondetection module.
 
+## Key Features
+
+- Detection of areas with a high likelihood of being clickable icons.
+- Detection of closest rectangle to point of interest (be it gaze, or mouse as in the examples)
+
 ## Usage
 
-You can use [box.py](https://github.com/luiszugasti/IconMatch/blob/main/icondetection/box.py) as a default entry point.
+You can use the functions as shown in [demo.py](https://github.com/luiszugasti/IconMatch/blob/main/icondetection/demo/demo.py) as a default entry point.
 
 In the below example, the main set of functions is called within a callback function, as this allows the threshold value
 to be controlled from a GUI in OpenCV.
 
     def threshold_callback(val):
-    """
-    Function modified from this tutorial:
-    Takes a value of threshold for the canny edge detector and finds the
-    bounding rectangles of appropriate edges within an image.
-    """
+        """
+        Takes a value of threshold for the canny edge detector and finds the
+        bounding rectangles of appropriate edges within an image.
+        """
 
-    # accept an input image and convert it to grayscale, and blur it
-    gray_scale_image = grayscale_blur(src)
-
-    # determine the bounding rectangles from canny detection
-    _, bound_rect = canny_detection(gray_scale_image, min_threshold=val)
-
-    # group the rectangles from this step
-    grouped_rects = group_rects(bound_rect, 0, src.shape[1])
-
-    # (for display purposes) use the provided rectangles to display in your program
-    _render_rectangles(grouped_rects, bound_rect, src)
-
+        # accept an input image and convert it to grayscale, and blur it
+        gray_scale_image = grayscale_blur(src)
+    
+        # determine the bounding rectangles from canny detection
+        _, bound_rect = canny_detection(gray_scale_image, min_threshold=val)
+    
+        # group the rectangles from this step
+        global grouped_rects
+        grouped_rects = group_rects(bound_rect, 0, src.shape[1])
+    
+        # (for display purposes) use the provided rectangles to display in your program
+        render_rectangles(grouped_rects, src.copy(), "Grouped Rectangles", desired_color=(36, 9, 14))
+        render_rectangles(bound_rect, src.copy(), "Original Rectangles", desired_color=(96, 9, 104))
+        candidate_rectangle_demo()
 
 ## Roadmap
 
-Currently focusing on detection of "icon-like" objects on the screen.
+*✔ denotes an available API, ❌ denotes a WIP API* 
 
-Next steps are to provide context into detected icons for easier usage of the computer.
+- ✔ Detect regions of interest with moderate accuracy
+- ✔ Detect candidate region based on proximity
+- ❌ Detect icon-like objects on the screen
+- ❌ Context provision into regions of interest
+
 
 ## Contributing
 
-Contributions are what make the open source community such an amazing place to be learn, inspire, and create. Any contributions you make are **greatly appreciated**.
+Contributions are what make the open source community such an amazing place to be learn, inspire, and create. Any contributions you make are **genuinely appreciated**.
 
 1. Fork the Project
 2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
@@ -106,4 +117,5 @@ Project Link: [https://github.com/luiszugasti/IconMatch](https://github.com/luis
 [license-url]: https://github.com/luiszugasti/IconMatch/blob/main/LICENSE.txt
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=flat-square&logo=linkedin&colorB=555
 [linkedin-url]: https://linkedin.com/in/luiszugasti
-[product-screenshot]: https://i.imgur.com/Q4Rm7M6.png
+[product-screenshot1]: https://i.imgur.com/Q4Rm7M6.png
+[product-screenshot2]: https://i.imgur.com/8NZGOa7.gif
