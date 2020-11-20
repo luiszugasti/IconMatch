@@ -3,7 +3,7 @@ import numpy as np
 import cv2
 
 
-def runSIFT(img):
+def run_sift(img):
     img = cv2.cvtColor(np.array(img), cv2.COLOR_RGB2BGR)
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
@@ -14,12 +14,12 @@ def runSIFT(img):
     return img
 
 
-def saveImg(img, name):
+def save_img(img, name):
     if isinstance(img, Image.Image):
         img.save("{0}.png".format(name))
     else:
         cv2.imwrite("{0}.png".format(name), img)
 
 
-def openImg(img_path):
+def open_img(img_path):
     return cv2.imread(img_path)

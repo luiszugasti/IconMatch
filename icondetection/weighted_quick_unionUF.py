@@ -61,18 +61,18 @@ class WeightedQuickUnionUF:
         Merges the component containing site p with the
         the component containing site q.
         """
-        rootP = self.find(p)
-        rootQ = self.find(q)
-        if rootP == rootQ:
+        root_p = self.find(p)
+        root_q = self.find(q)
+        if root_p == root_q:
             return
 
         # make smaller root point to larger one
-        if self.size[rootP] < self.size[rootQ]:
-            self.parent[rootP] = (rootQ, self.parent[rootP][1])
-            self.size[rootQ] = self.size[rootQ] + self.size[rootP]
+        if self.size[root_p] < self.size[root_q]:
+            self.parent[root_p] = (root_q, self.parent[root_p][1])
+            self.size[root_q] = self.size[root_q] + self.size[root_p]
         else:
-            self.parent[rootQ] = (rootP, self.parent[rootQ][1])
-            self.size[rootP] = self.size[rootP] + self.size[rootQ]
+            self.parent[root_q] = (root_p, self.parent[root_q][1])
+            self.size[root_p] = self.size[root_p] + self.size[root_q]
 
         self.count = self.count - 1
         pass
