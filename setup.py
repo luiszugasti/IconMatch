@@ -11,7 +11,7 @@ REQUIRES_PYTHON = ">=3.8"
 # This call to setup() does all the work
 setup(
     name="icondetection",
-    version="0.0.1",
+    version="0.1.0",
     description="Detect icons on the screen easily and quickly.",
     long_description=README,
     long_description_content_type="text/markdown",
@@ -20,17 +20,11 @@ setup(
     author_email="hello@luiszugasti.me",
     license="MIT",
     classifiers=[
-        "License :: OSI Approved :: MIT License",
-        "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.7",
+        "License :: MIT License",
+        "Programming Language :: Python :: 3.8",
     ],
     python_requires=REQUIRES_PYTHON,
     packages=find_packages(exclude=["test", "*.test", "*.test.*", "test.*"]),
     include_package_data=True,
     install_requires=["Pillow", "opencv-contrib-python", "numpy"],
-    entry_points={
-        "console_scripts": [
-            "realpython=reader.__main__:main",
-        ]
-    },
 )
