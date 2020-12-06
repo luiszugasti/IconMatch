@@ -15,6 +15,7 @@ Part of the Hands Free Computing project. This subproject aims to allow a user t
     - [Prerequisites](#prerequisites)
     - [Installation](#installation)
   - [Usage](#usage)
+  - [API](#api)
   - [Roadmap](#roadmap)
   - [Contributing](#contributing)
   - [License](#license)
@@ -74,6 +75,17 @@ to be controlled from a GUI in OpenCV.
         render_rectangles(grouped_rects, src.copy(), "Grouped Rectangles", desired_color=(36, 9, 14))
         render_rectangles(bound_rect, src.copy(), "Original Rectangles", desired_color=(96, 9, 104))
         candidate_rectangle_demo()
+
+## API
+
+The current available APIs encompass what your image processing pipeline should contain. Both APIs are 
+currently still experimental as I learn more about OpenCV and optimize code.
+
+### canny_detection(gray_scale_image, min_threshold)
+> Performs canny detection when given a gray scale image and a minimum threshold for hysteresis. Returns bounding rectangles of points of interest.
+
+### group_rects(bound_rectangles, initial_scanning_range, final_scanning_range)
+> Groups rectangles that are overlapping in two-dimensional space and returns their conglomerate components.
 
 ## Roadmap
 
