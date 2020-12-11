@@ -8,10 +8,10 @@
 
 <p align="center">
   <a href="https://luiszugasti.me">
-    <img src="product-screenshot1" alt="Showcasing bounding boxes and original image"/>
+    <img src="https://raw.githubusercontent.com/luiszugasti/IconMatch/main/images/screenshot.png" alt="Showcasing bounding boxes and original image"/>
   </a>
   <a href="https://luiszugasti.me">
-    <img src="product-screenshot2" alt="Showcasing candidate boxes functionality"/>
+    <img src="https://raw.githubusercontent.com/luiszugasti/IconMatch/main/images/nearest_box.gif" alt="Showcasing candidate boxes functionality"/>
   </a>
 </p>
 
@@ -35,13 +35,13 @@ This is part of the Hands Free Computing project. Built with [OpenCV 3.12](https
 
 ## Installation 
 
-1. Clone the repo and open it locally
+1. Clone the repo and open it locally:
 ```
 $ git clone https://github.com/luiszugasti/IconMatch/
 $ cd IconMatch
 ```
 
-2. Install the requirements
+2. Install the [requirements](https://github.com/luiszugasti/IconMatch/blob/main/icondetection/requirements.txt):
 ```
 $ pip install -r requirements.txt
 ```
