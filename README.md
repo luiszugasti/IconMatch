@@ -1,16 +1,27 @@
-[![MIT License][license-shield]][license-url]
-[![LinkedIn][linkedin-shield]][linkedin-url]
+<h1 align="center">
+	IconMatch
+</h1>
 
-# IconMatch
+<p align="center">
+	<i>Easily select icons on the screen in any environment.</i>
+</p>
 
-Part of the Hands Free Computing project. This subproject aims to allow a user to easily select icons on the screen in any environment.
+<p align="center">
+  <a href="https://luiszugasti.me">
+    <img src="product-screenshot1" alt="Showcasing bounding boxes and original image"/>
+  </a>
+  <a href="https://luiszugasti.me">
+    <img src="product-screenshot2" alt="Showcasing candidate boxes functionality"/>
+  </a>
+</p>
+
+  
+This is part of the Hands Free Computing project. Built with [OpenCV 3.12](https://opencv.org) and [Python 3.8](https://python.org).
 
 ## Table of Contents
 
 - [IconMatch](#iconmatch)
   - [Table of Contents](#table-of-contents)
-  - [About The Project](#about-the-project)
-    - [Built With](#built-with)
   - [Getting Started](#getting-started)
     - [Prerequisites](#prerequisites)
     - [Installation](#installation)
@@ -21,32 +32,19 @@ Part of the Hands Free Computing project. This subproject aims to allow a user t
   - [License](#license)
   - [Contact](#contact)
 
-## About The Project
 
-[![Showcasing bounding boxes and original image][product-screenshot1]](https://luiszugasti.me)
-[![Showcasing candidate boxes functionality][product-screenshot2]](https://luiszugasti.me)
+## Installation 
 
-### Built With
+1. Clone the repo and open it locally
+```
+$ git clone https://github.com/luiszugasti/IconMatch/
+$ cd IconMatch
+```
 
-- [OpenCV 3.12](https://opencv.org)
-- [Python 3.8](https://python.org)
-
-## Getting Started 
-
-### Prerequisites
-
-Refer to the [requirements.txt](https://github.com/luiszugasti/IconMatch/blob/main/requirements.txt) file.
-
-### Installation
-
-Clone this repository to your computer.  
-Install the project using Python 3.8; then install the requirements in the requirements.txt file.  
-A sample demo of how the engine works so far can be found within the icondetection module.
-
-## Key Features
-
-- Detection of areas with a high likelihood of being clickable icons.
-- Detection of closest rectangle to point of interest (be it gaze, or mouse as in the examples)
+2. Install the requirements
+```
+$ pip install -r requirements.txt
+```
 
 ## Usage
 
@@ -54,7 +52,7 @@ You can use the functions as shown in [demo.py](https://github.com/luiszugasti/I
 
 In the below example, the main set of functions is called within a callback function, as this allows the threshold value
 to be controlled from a GUI in OpenCV.
-
+```python
     def threshold_callback(val):
         """
         Takes a value of threshold for the canny edge detector and finds the
@@ -75,6 +73,12 @@ to be controlled from a GUI in OpenCV.
         render_rectangles(grouped_rects, src.copy(), "Grouped Rectangles", desired_color=(36, 9, 14))
         render_rectangles(bound_rect, src.copy(), "Original Rectangles", desired_color=(96, 9, 104))
         candidate_rectangle_demo()
+```
+
+## Key Features
+
+- Detection of areas with a high likelihood of being clickable icons.
+- Detection of closest rectangle to point of interest (be it gaze, or mouse as in the examples)
 
 ## API
 
@@ -89,12 +93,10 @@ currently still experimental as I learn more about OpenCV and optimize code.
 
 ## Roadmap
 
-*✔ denotes an available API, ❌ denotes a WIP API* 
-
-- ✔ Detect regions of interest with moderate accuracy
-- ✔ Detect candidate region based on proximity
-- ❌ Detect icon-like objects on the screen
-- ❌ Context provision into regions of interest
+- [x] Detect regions of interest with moderate accuracy
+- [x] Detect candidate region based on proximity
+- [ ] Detect icon-like objects on the screen
+- [ ] Context provision into regions of interest
 
 
 ## Contributing
