@@ -41,7 +41,7 @@ $ git clone https://github.com/luiszugasti/IconMatch/
 $ cd IconMatch
 ```
 
-2. Install the [requirements](https://github.com/luiszugasti/IconMatch/blob/main/icondetection/requirements.txt):
+2. Install the [requirements](https://github.com/luiszugasti/IconMatch/blob/main/requirements.txt):
 ```
 $ pip install -r requirements.txt
 ```
