@@ -9,7 +9,7 @@ from icondetection.weighted_quick_unionUF import WeightedQuickUnionUF as uf
 
 def containing_rectangle(rects: List[Rectangle], query_point: tuple) -> Rectangle or None:
     """
-    Determine the rectangle that covers this query point. Return None if there is no overlap.
+    Provide the rectangle that covers this query point. Return None if there is no overlap.
     TODO: Currently non-deterministic due to iterating through an unordered list.
     """
 

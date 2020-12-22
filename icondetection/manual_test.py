@@ -5,6 +5,11 @@ from icondetection.helpers import run_sift, save_img
 
 
 def main():
+    """
+    Manual test is an interactive screen shot tool that will perform SIFT on the image.
+    todo: Add more options for edge detection algorithm and options on where to save image.
+    todo: Add functionality for previewing before saving an image.
+    """
     print("Choose the top left and bottom right coordinates of your box.")
 
     button_presses = []

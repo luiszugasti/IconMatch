@@ -20,7 +20,7 @@ setup(
     author_email="hello@luiszugasti.me",
     license="MIT",
     classifiers=[
-        "License :: MIT License",
+        "License :: OSI Approved :: MIT License",
         "Programming Language :: Python :: 3.8",
     ],
     python_requires=REQUIRES_PYTHON,

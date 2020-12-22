@@ -216,7 +216,6 @@ class TestBox(unittest.TestCase):
     """
 
     def setUp(self):
-        # one of these days I'm going to change the openCV interface to make more sense...
         self.google_rectangles = [r.Rectangle(193, 279, 236, 297),
                                   r.Rectangle(255, 279, 275, 294),
                                   r.Rectangle(241, 282, 250, 294),
@@ -297,7 +296,7 @@ class TestBox(unittest.TestCase):
         self.assertEqual(self.e_red, box.closest_rectangle(self.google_rectangles_small, point_under_e_red))
 
     def test_candidate_rectangle(self):
-        # integration test?
+        # TODO: Complete this integration test.
         pass
 
     if __name__ == "__main__":

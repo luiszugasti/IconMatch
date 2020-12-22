@@ -6,14 +6,14 @@ from icondetection.box import grayscale_blur, canny_detection, group_rects, cand
 from icondetection.rectangle import Rectangle
 
 
-# todo: correct order of x, y?
-def closest_rectangle_handler(event, x: int, y: int, flags, params):
+def closest_rectangle_handler(event: int, x: int, y: int, flags, params) -> None:
     """
     Determine the closest rectangle to mouse click.
     https://divyanshushekhar.com/mouse-events-opencv/
+    TODO: The ordering of x and y appears to be inconsistent. Check highlighted line
     """
 
-    # grr globals
+    # globals necessary for access in callback function
     global src, src2, candidate_rect, grouped_rects, excluded_rects
 
     if event == cv.EVENT_LBUTTONDOWN:
@@ -21,7 +21,7 @@ def closest_rectangle_handler(event, x: int, y: int, flags, params):
         color = (rng.randint(0, 256), rng.randint(0, 256), rng.randint(0, 256))
 
         src2 = src.copy()
-        candidate_rect = candidate_rectangle([Rectangle.rect_cv_to_cartesian(t) for t in grouped_rects], (y, x))
+        candidate_rect = candidate_rectangle([Rectangle.rect_cv_to_cartesian(t) for t in grouped_rects], (y, x))  # TODO
         excluded_rects = filter(lambda rect: rect is not candidate_rect, grouped_rects)
 
         cv.rectangle(
@@ -34,23 +34,20 @@ def closest_rectangle_handler(event, x: int, y: int, flags, params):
         cv.imshow("Candidate Rectangles", src2)
 
 
-def null_handler(event, x, y, flags, params):
-    """
-    Null handler. Does nothing.
-    """
+def null_handler(event: int, x: int, y: int, flags, params) -> None:
+    """A placeholder handler that does nothing."""
     pass
 
 
-def candidate_rectangle_demo():
-    """
-    Show a candidate rectangle for a pressed location
-    """
+def candidate_rectangle_demo() -> None:
+    """Show a candidate rectangle for a pressed location"""
 
     cv.imshow("Candidate Rectangles", src2)
     cv.setMouseCallback("Candidate Rectangles", closest_rectangle_handler)
 
 
-def render_rectangles(rectangles, input_image, display_text, callback=null_handler, desired_color: tuple = None):
+def render_rectangles(rectangles, input_image, display_text, callback=null_handler,
+                      desired_color: tuple = None) -> None:
     """
     Render given rectangles on provided input image.
     Note: Make sure to send a copy of your image with .copy()
@@ -77,10 +74,10 @@ def render_rectangles(rectangles, input_image, display_text, callback=null_handl
     cv.setMouseCallback(display_text, callback)
 
 
-def threshold_callback(val):
+def threshold_callback(val: int) -> None:
     """
-    Takes a value of threshold for the canny edge detector and finds the
-    bounding rectangles of appropriate edges within an image.
+    Takes a value of threshold for the canny edge detector and finds the bounding rectangles of appropriate edges
+    within an image.
     """
 
     # accept an input image and convert it to grayscale, and blur it

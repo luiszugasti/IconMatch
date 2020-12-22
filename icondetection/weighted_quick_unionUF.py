@@ -1,8 +1,7 @@
 class WeightedQuickUnionUF:
     """
-    Weighted Quick Union UF is a Python conversion of the algorithm as '
-    implemented by Kevin Wayne and Robert Sedgewick for their Algorithms 1
-    course on Coursera.
+    Weighted Quick Union UF is a Python conversion of the algorithm as implemented by Kevin Wayne and Robert Sedgewick
+    for their Algorithms 1 course on Coursera.
 
     https://algs4.cs.princeton.edu/code/javadoc/edu/princeton/cs/algs4/WeightedQuickUnionUF.html
     """
@@ -16,36 +15,36 @@ class WeightedQuickUnionUF:
         Within the parent list, each entry is a tuple that contains the "parent"
         index, as well as the object holding that specific entry (generic)
         """
-        self.parent = [None] * n
-        self.size = [1] * n
-        self.count = n
+        self._parent = [(0, None)] * n
+        self._size = [1] * n
+        self._count = n
         for i in range(n):
-            self.parent[i] = (i, entries[i])
+            self._parent[i] = (i, entries[i])
 
     def count(self):
         """
         Returns the number of components.
         """
-        return self.count
+        return self._count
 
     def find(self, p: int):
         """
         Returns the component identifier for the component containing site p.
         """
         self._validate(p)
-        while p != self.parent[p][0]:
+        while p != self._parent[p][0]:
             # path compression (make every other node in path point to its grandparent)
-            self.parent[p] = (self.parent[self.parent[p][0]][0], self.parent[p][1])
+            self._parent[p] = (self._parent[self._parent[p][0]][0], self._parent[p][1])
 
-            p = self.parent[p][0]
+            p = self._parent[p][0]
 
         return p
 
     def _validate(self, p: int):
         """
-        Validate that p is a valid index
+        Validate that p is a valid index.
         """
-        n = len(self.parent)
+        n = len(self._parent)
         if p is None or p < 0 or p >= n:
             raise ValueError("index {0} is not between 0 and {1}".format(p, n - 1))
 
@@ -58,8 +57,7 @@ class WeightedQuickUnionUF:
 
     def union(self, p: int, q: int):
         """
-        Merges the component containing site p with the
-        the component containing site q.
+        Merges the component containing site p with the component containing site q.
         """
         root_p = self.find(p)
         root_q = self.find(q)
@@ -67,14 +65,14 @@ class WeightedQuickUnionUF:
             return
 
         # make smaller root point to larger one
-        if self.size[root_p] < self.size[root_q]:
-            self.parent[root_p] = (root_q, self.parent[root_p][1])
-            self.size[root_q] = self.size[root_q] + self.size[root_p]
+        if self._size[root_p] < self._size[root_q]:
+            self._parent[root_p] = (root_q, self._parent[root_p][1])
+            self._size[root_q] = self._size[root_q] + self._size[root_p]
         else:
-            self.parent[root_q] = (root_p, self.parent[root_q][1])
-            self.size[root_p] = self.size[root_p] + self.size[root_q]
+            self._parent[root_q] = (root_p, self._parent[root_q][1])
+            self._size[root_p] = self._size[root_p] + self._size[root_q]
 
-        self.count = self.count - 1
+        self._count = self._count - 1
         pass
 
     def get_unions(self):
@@ -82,11 +80,11 @@ class WeightedQuickUnionUF:
         Retrieves and returns all groups, according to their parent
         """
         components = {}
-        for index_element in range(len(self.parent)):
+        for index_element in range(len(self._parent)):
             # get parent component
             index_parent = self.find(index_element)
-            parent = self.parent[index_parent][1]
-            child = self.parent[index_element][1]
+            parent = self._parent[index_parent][1]
+            child = self._parent[index_element][1]
 
             # add it to the mapping, or add the current component to its list
             if index_parent not in components:
