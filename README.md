@@ -20,11 +20,8 @@ This is part of the Hands Free Computing project. Built with [OpenCV 3.12](https
 
 ## Table of Contents
 
-- [IconMatch](#iconmatch)
-  - [Table of Contents](#table-of-contents)
-  - [Getting Started](#getting-started)
-    - [Prerequisites](#prerequisites)
-    - [Installation](#installation)
+
+  - [Installation](#installation)
   - [Usage](#usage)
   - [API](#api)
   - [Roadmap](#roadmap)
@@ -53,26 +50,33 @@ You can use the functions as shown in [demo.py](https://github.com/luiszugasti/I
 In the below example, the main set of functions is called within a callback function, as this allows the threshold value
 to be controlled from a GUI in OpenCV.
 ```python
-    def threshold_callback(val):
-        """
-        Takes a value of threshold for the canny edge detector and finds the
-        bounding rectangles of appropriate edges within an image.
-        """
+import cv2 as cv
 
-        # accept an input image and convert it to grayscale, and blur it
-        gray_scale_image = grayscale_blur(src)
-    
-        # determine the bounding rectangles from canny detection
-        _, bound_rect = canny_detection(gray_scale_image, min_threshold=val)
-    
-        # group the rectangles from this step
-        global grouped_rects
-        grouped_rects = group_rects(bound_rect, 0, src.shape[1])
-    
-        # (for display purposes) use the provided rectangles to display in your program
-        render_rectangles(grouped_rects, src.copy(), "Grouped Rectangles", desired_color=(36, 9, 14))
-        render_rectangles(bound_rect, src.copy(), "Original Rectangles", desired_color=(96, 9, 104))
-        candidate_rectangle_demo()
+from icondetection.demo.demo import render_rectangles, candidate_rectangle_demo
+from icondetection.box import grayscale_blur, canny_detection, group_rects
+
+src = cv.imread("source to your image file")
+
+def threshold_callback(val):
+    """
+    Takes a value of threshold for the canny edge detector and finds the
+    bounding rectangles of appropriate edges within an image.
+    """
+
+    # accept an input image and convert it to grayscale, and blur it
+    gray_scale_image = grayscale_blur(src)
+
+    # determine the bounding rectangles from canny detection
+    _, bound_rect = canny_detection(gray_scale_image, min_threshold=val)
+
+    # group the rectangles from this step - variable is global for demo purposes
+    global grouped_rects
+    grouped_rects = group_rects(bound_rect, 0, src.shape[1])
+
+    # (for display purposes) use the provided rectangles to display in your program
+    render_rectangles(grouped_rects, src.copy(), "Grouped Rectangles", desired_color=(36, 9, 14))
+    render_rectangles(bound_rect, src.copy(), "Original Rectangles", desired_color=(96, 9, 104))
+    candidate_rectangle_demo()
 ```
 
 ## Key Features
